@@ -6,7 +6,7 @@ body{
     background-position: bottom center;
 }
 
-.button--main--menu{
+.a--main--menu{
     background: linear-gradient(45deg, #FF0000 0%, #990000 100%);
     font-size: 1.5rem;
     padding: 1rem 2rem;
@@ -16,6 +16,7 @@ body{
     width: 500px;
     color: white;
     font-weight: bold;
+    text-align: center;
 }
 
 .h1--main--menu{
