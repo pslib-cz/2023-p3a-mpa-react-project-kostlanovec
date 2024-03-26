@@ -1,7 +1,7 @@
 .board {
     display: grid;
-    grid-template-columns: repeat(13, 1fr);
-    grid-template-rows: repeat(13, 1fr);
+    grid-template-columns: repeat(6, 1fr);
+    grid-template-rows: repeat(6, 1fr);
     height: 100vh;
     width: 100vh;
 }
@@ -10,12 +10,4 @@
     border: 1px solid black;
     grid-row-end: span 1;
     grid-column-end: span 1;
-}
-
-.double-height {
-    grid-row-end: span 2; /* Řádky zasahující do dvou řádků */
-}
-
-.double-width {
-    grid-column-end: span 2; /* Sloupce zasahující do dvou sloupců */
 }

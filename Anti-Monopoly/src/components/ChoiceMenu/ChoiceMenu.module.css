@@ -6,3 +6,21 @@ body{
     background-position: bottom center;
     background-size: 100% auto;
 }
+
+.choice--role{
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: 1fr 1fr;
+    padding: 3em;
+}
+
+.choice--menu{
+    width: 90%;
+    height: 90%;
+    margin: 0 auto;
+    border-radius: 2em;
+    border: 1px solid black;
+    background-color: var(--white);
+    margin-top: 5%;
+    position: relative;
+}
