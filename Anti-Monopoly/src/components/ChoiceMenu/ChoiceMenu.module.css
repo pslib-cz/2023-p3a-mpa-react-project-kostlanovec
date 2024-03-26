@@ -1,0 +1,8 @@
+body{
+    width: 100%;
+    height: 100vh;
+    background-image: url('img/city.png');
+    background-repeat: no-repeat;
+    background-position: bottom center;
+    background-size: 100% auto;
+}

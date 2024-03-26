@@ -1,0 +1,41 @@
+body{
+    width: 100%;
+    height: 100vh;
+    background-image: url('img/city.png');
+    background-repeat: no-repeat;
+    background-position: bottom center;
+}
+
+.button--main--menu{
+    background: linear-gradient(45deg, #FF0000 0%, #990000 100%);
+    font-size: 1.5rem;
+    padding: 1rem 2rem;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s;
+    width: 500px;
+    color: white;
+    font-weight: bold;
+}
+
+.h1--main--menu{
+    text-align: center;
+    font-weight: bold;
+    font-size: 5em;
+    color: white;
+    -webkit-text-stroke: 1px red;
+}
+.div--buttons{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 64px;
+}
+
+.made__by{
+    position: absolute;
+    bottom: 0;
+    right: 2em;
+    color: white;
+}
