@@ -23,8 +23,16 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
     const { fields } = playingState;
 
     useEffect(() => {
-        playingDispatch({ type: 'INIT_PLAYERS', defaultMoney: 1500, defaultPosition: 0, players: [...settingsState.players] });
+        playingDispatch({ type: 'INIT_PLAYERS', defaultMoney: 100, defaultPosition: 0, players: [...settingsState.players] });
     }, [playingDispatch, settingsState.players]);
+
+
+    useEffect(() => {
+        const currentPlayer = playingState.players.find(player => player.id === currentPlayerId);
+        if (currentPlayer && !currentPlayer.isBankrupt) {
+            checkFinancialStatus(currentPlayerId);
+        }
+    }, [currentPlayerId, playingState.players, playingState.ownership, fields]);
 
     const handleDiceRoll = (diceNumber: string, value: number) => {
         setDiceResults(prevResults => ({
@@ -42,19 +50,28 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
 
     const movePlayer = (playerId: number, rollValue: number) => {
         playingDispatch({ type: 'MOVE_PLAYER', playerId, rollValue });
-        const nextPlayerIdTemp = (playerId % playingState.players.length) + 1;
-
+    
         const currentPlayer = playingState.players.find(player => player.id === playerId);
+        if (currentPlayer?.isBankrupt) {
+            setCurrentPlayerId((playerId % playingState.players.length) + 1);
+            return;
+        }
         const newPosition = currentPlayer ? (currentPlayer.position + rollValue) % fields.length : 0;
         const landedField = fields[newPosition];
-
+        
         if (landedField.type === "PROPERTY" && playingState.ownership[newPosition] === undefined) {
-            setShowBuyPropertyDialog(true);
-            setNextPlayerId(nextPlayerIdTemp);
+            const propertyPrice = landedField.price;
+            if ((currentPlayer?.money ?? 0) >= propertyPrice) {
+                setShowBuyPropertyDialog(true);
+            } else {
+            
+                setCurrentPlayerId((playerId % playingState.players.length) + 1);
+            }
         } else {
-            setCurrentPlayerId(nextPlayerIdTemp);
+            setCurrentPlayerId((playerId % playingState.players.length) + 1);
         }
     };
+    
 
     const handleDialogResponse = (response: boolean) => {
         if (response) {
@@ -87,6 +104,34 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
         playingDispatch({ type: 'SELL_PROPERTY', playerId, fieldIndex, price });
         setShowSellPropertyDialog(false);
     }
+
+    const checkFinancialStatus = (playerId: number) => {
+        const currentPlayer = playingState.players.find(player => player.id === playerId);
+        if (currentPlayer && currentPlayer.money < 0) {
+            const propertiesOwned = findPropertiesOwnedByPlayer(playerId);
+            if (propertiesOwned.length > 0) {
+                const totalValueOfProperties = propertiesOwned.reduce((acc, property) => {
+                    if (property.type === "PROPERTY") {
+                        return acc + property.price;
+                    }
+                    return acc;
+                }, 0);
+                if (totalValueOfProperties + currentPlayer.money >= 0) {
+                    setShowSellPropertyDialog(true);
+                } else {
+                    handleBankruptcy(playerId);
+                }
+            } else {
+                handleBankruptcy(playerId);
+            }
+        }
+    };
+    
+    const handleBankruptcy = (playerId: number) => {
+        playingDispatch({ type: "DECLARE_BANKRUPTCY", playerId });
+        alert(`Player ${playerId} has gone bankrupt and is out of the game!`);
+        setCurrentPlayerId((playerId % playingState.players.length) + 1);
+    };
 
 
     return (

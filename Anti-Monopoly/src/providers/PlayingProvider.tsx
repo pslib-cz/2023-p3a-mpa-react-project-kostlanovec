@@ -25,7 +25,7 @@ type Player = {
     const initialFields: Field[] = [
       { type: "START", money: 200 },
       { name: "Property 1", type: "PROPERTY", price: 100, rent: 10, houses: 0 },
-      { type: "PAY", classicmoney: 50 },
+      { type: "PAY", classicmoney: 5000 },
       { type: "TAX", percent: 20, money: 100 },
       { type: "CHANCE_CARD"},
       { type: "PROPERTY", name: "Property 2", price: 200, rent: 20, houses: 0 },
@@ -216,18 +216,21 @@ type Action =
 
   return state;
 
-case 'DECLARE_BANKRUPTCY':
-  const bankruptPlayer = state.players.find(p => p.id === action.playerId);
-  if (bankruptPlayer) {
+  case 'DECLARE_BANKRUPTCY':
+    const updatedOwnership = { ...state.ownership };
+    Object.keys(updatedOwnership).forEach(y => {
+      const keyAsNumber = Number(y);
+      if (updatedOwnership[keyAsNumber] === action.playerId) {
+          delete updatedOwnership[keyAsNumber];
+      }
+  });
+
     return {
-      ...state,
-      players: state.players.map(p =>
-        p.id === action.playerId
-          ? { ...p, isBankrupt: true }
-          : p
-      ),
+        ...state,
+        ownership: updatedOwnership,
+        players: state.players.map(p => p.id === action.playerId ? { ...p, isBankrupt: true } : p),
     };
-  }
+
 
   return state;
       default:
