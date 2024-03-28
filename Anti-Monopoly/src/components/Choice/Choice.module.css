@@ -1,3 +1,21 @@
+.choice--figure{
+    position: relative;
+}
+
 .choice--figure > img{
     border-radius: 360px;
+    cursor: pointer;
+}
+
+.choice--figure > figcaption{
+    text-align: center;
+}
+
+.delete__bubble{
+    position: absolute;
+    right: 0;
+    top: 0;
+    background-color: red;
+    border-radius: 360px;
+    cursor: pointer;
 }

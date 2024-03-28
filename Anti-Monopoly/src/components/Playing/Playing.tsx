@@ -1,13 +1,15 @@
-import React from "react";
-import styles from './Rules.module.css';
-import { Link } from "react-router-dom";
 import Board from "./Board";
+import WindowsStats from "./WindowStats";
+import styles from './Playing.module.css';
 
 const Playing = () => {
 
     return (
         <>
+        <div className={styles["playing--layout"]}>
         <Board />
+        <WindowsStats />
+        </div>
         </>
     );
 };

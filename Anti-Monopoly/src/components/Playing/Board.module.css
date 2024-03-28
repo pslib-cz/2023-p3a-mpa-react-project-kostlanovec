@@ -11,3 +11,11 @@
     grid-row-end: span 1;
     grid-column-end: span 1;
 }
+
+.player{
+    position: absolute;
+    border-radius: 360px;
+    background-color: red;
+    height: 20px;
+    width: 20px;
+}

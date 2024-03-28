@@ -1,22 +1,48 @@
+import React, { useContext, useState } from "react";
 import { Link } from "react-router-dom";
 import Choice from "../Choice/Choice";
 import styles from "../ChoiceMenu/ChoiceMenu.module.css";
+import { Role } from './../../types/type';
+import { SettingsContext } from "../../providers/SettingsProvider";
+
 const ChoiceMenu = () => {
-    console.log("ChoiceMenu")
+    const [state, dispatch] = useContext(SettingsContext);
+    const { players } = state;
+
+    const addPlayer = () => {
+        dispatch({ type: "ADD_PLAYER" });
+    };
+
+    const removePlayer = (id: number) => {
+        console.log("smazání hráče")
+        dispatch({ type: "REMOVE_PLAYER", payload: id });
+    };
+
+    const toggleRole = (id: number) => {
+        dispatch({ type: "TOGGLE_ROLE", payload: id });
+    };
+
+
     return (
         <div className={styles["choice--menu"]}>
             <div className={styles["choice--role"]}>
-                <Choice />
-                <Choice />
-                <Choice />
-                <Choice />
+                {players.map((player, index) => (
+                    <Choice 
+                        key={player.id} 
+                        id={player.id} 
+                        role={player.role} 
+                        onRemove={() => removePlayer(player.id)} 
+                        onToggleRole={() => toggleRole(player.id)}
+                        canRemove={index === players.length - 1 && players.length > 2}
+                    />
+                    
+                
+                ))}
+                {players.length < 6 &&
+                        <div className={styles["add--figure"]} onClick={addPlayer} ></div>
+                    }
             </div>
-            <div>
-            <input type="radio" id="time-limit" />
-            <label htmlFor="time-limit">časový limit</label>
-            <input type="radio" id="all-vs-all" />
-            <label htmlFor="all-vs-all">Všichni proti všem</label>
-            </div>
+           
             <Link to="/playing">Start</Link>
         </div>
     );

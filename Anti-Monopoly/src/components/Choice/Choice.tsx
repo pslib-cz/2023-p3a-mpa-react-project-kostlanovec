@@ -1,16 +1,33 @@
-import React from "react";
 import styles from './Choice.module.css';
+import { Role } from './../../types/type';
 
-const Choice = () => {
+const Choice = ({ id, role, onRemove, onToggleRole, canRemove }: { id: number, role: Role, onRemove: () => void, onToggleRole: () => void, canRemove: boolean }) => {
+    const getImageForRole = (role: Role) => {
+        console.log(role)
+        switch(role) {
+            case Role.MONOPOLIST:
+                return "img/monopolista.jpg";
+            default:
+                return "img/konkurent.jpg";
+        }
+    };
+
+    const imageSrc = getImageForRole(role);
 
     return (
-        <figure className={styles["choice--figure"]}>
-            <img src="img/konkurent.jpg"></img>
-            <p>Hráč 1</p>
-            <div className={styles["delete__bubble"]}>
-
-            </div>
+        <figure className={styles["choice--figure"]} onClick={onToggleRole}>
+            <img src={imageSrc} alt={`Hráč ${id}`} />
+            <figcaption>{`Hráč ${id}`}</figcaption>
+            {canRemove && (
+                <div className={styles["delete__bubble"]} onClick={(e) => {
+                    e.stopPropagation();
+                    onRemove();
+                }}>
+                    X
+                </div>
+            )}
         </figure>
+        
     );
 };
 
