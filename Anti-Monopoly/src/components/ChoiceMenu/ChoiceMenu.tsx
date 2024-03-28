@@ -39,11 +39,12 @@ const ChoiceMenu = () => {
                 
                 ))}
                 {players.length < 6 &&
-                        <div className={styles["add--figure"]} onClick={addPlayer} ></div>
+                        <figure><div className={styles["add--figure"]} onClick={addPlayer} ></div></figure>
                     }
+            </div> 
+           <div className={styles["div--link"]}>
+            <Link className={styles["a--playing"]} to="/playing">Start</Link>
             </div>
-           
-            <Link to="/playing">Start</Link>
         </div>
     );
 };

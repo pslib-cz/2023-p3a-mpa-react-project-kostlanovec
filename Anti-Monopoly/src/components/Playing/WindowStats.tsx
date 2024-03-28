@@ -1,23 +1,26 @@
 import { useContext } from "react";
 import { PlayingContext } from "../../providers/PlayingProvider";
+import styles from './WindowStats.module.css';
 
-const WindowsStats = () => {
-
-        const [state] = useContext(PlayingContext);
-        const { players } = state; 
-        
-        return (
-                <div>
-                <h2>Players</h2>
-                <ul>
-                {players.map(player => (
-                    <li key={player.id}>
-                        ID: {player.id}, Role: {player.role}, money: {player.money}, position: {player.position},
-                    </li>
-                ))}
-            </ul>
-                </div>
-        );
+const WindowsStats = ({ currentPlayerId }: { currentPlayerId: number }) => {
+    const [state] = useContext(PlayingContext);
+    const { players } = state; 
+    const currentPlayer = players.find(player => player.id === currentPlayerId);
+    
+    return (
+        <div>
+            <div className={styles["current-player"]}>
+                <h2>Current Player: {currentPlayer ? `Player ${currentPlayer.id}` : 'Loading...'}</h2>
+                {currentPlayer && (
+                    <ul>
+                        <li>Money: ${currentPlayer.money}</li>
+                        <li>Position: {currentPlayer.position}</li>
+                        <li>Role: {currentPlayer.role}</li>
+                    </ul>
+                )}
+            </div>
+        </div>
+    );
 };
 
 export default WindowsStats;
