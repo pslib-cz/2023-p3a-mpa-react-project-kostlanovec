@@ -8,6 +8,9 @@ const Board = () => {
     const [settingsState] = useContext(SettingsContext);
     const [playingState, playingDispatch] = useContext(PlayingContext);
     const [currentPlayerId, setCurrentPlayerId] = useState(1);
+    const [openPropertyDialog, setOpenPropertyDialog] = useState(false);
+    const [showChangeCardDialog, setShowChangeCardDialog] = useState(false);
+    const [showSellPropertyDialog, setShowSellPropertyDialog] = useState(false);
 
     const { fields } = playingState;
 
