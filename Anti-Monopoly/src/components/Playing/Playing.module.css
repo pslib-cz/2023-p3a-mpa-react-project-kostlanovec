@@ -1,3 +1,7 @@
 .playing--layout{
     display: flex;
 }
+
+body{
+    background-image: none;
+}

@@ -1,5 +1,5 @@
 import React, { PropsWithChildren, createContext, useReducer } from 'react';
-import { Role } from '../types/type';
+import { Role, Field,  } from '../types/type';
 
 
 type PlayingPlayer = {
@@ -23,15 +23,46 @@ type Player = {
   };
 
     const initialFields: Field[] = [
-      { type: "START", money: 200 },
-      { name: "Property 1", type: "PROPERTY", price: 100, rent: 10, houses: 0 },
-      { type: "PAY", classicmoney: 5000 },
-      { type: "TAX", percent: 20, money: 100 },
-      { type: "CHANCE_CARD"},
-      { type: "PROPERTY", name: "Property 2", price: 200, rent: 20, houses: 0 },
-      { type: "JAIL"},
-      { type: "JAIL"},
-      { type: "PROPERTY", name: "Property 3", price: 200, rent: 20, houses: 0 },
+      { type: "START", money: 200, id: 1 },
+      { name: "Property 1", type: "PROPERTY", price: 100, rent: 10, houses: 0, id: 2},
+      { type: "PAY", classicmoney: 5000, id: 3},
+      { type: "TAX", percent: 20, money: 100, id:4 },
+      { name: "Property 10", type: "PROPERTY", price: 100, rent: 10, houses: 0, id: 5},
+      { type: "PROPERTY", name: "Property 2", price: 100, rent: 20, houses: 0, id: 6},
+      { type: "JAIL", id: 7},
+      { type: "JAIL", id : 8},
+      { type: "PROPERTY", name: "Property 3", price: 100, rent: 20, houses: 0, id: 9},
+      { type: "ANTI_MONOPOLY_OFFICE", id: 10},
+      { type: "ANTI_MONOPOLY_OFFICE", id: 11},
+      { type: "PROPERTY", name: "Property 4", price: 100, rent: 20, houses: 0, id: 39},
+      { type: "PAY", classicmoney: 50, id: 11},
+      { type: "PROPERTY", name: "Property 5", price: 100, rent: 20, houses: 0, id: 38},
+      { type: "JAIL", id: 12},
+      { type: "JAIL", id: 37},
+      { type: "PROPERTY", name: "Property 6", price: 100, rent: 20, houses: 0, id: 13},
+      { type: "JAIL", id: 36},
+      { type: "JAIL", id: 14},
+      { type: "JAIL", id: 35},
+      { type: "JAIL", id: 15},
+      { type: "JAIL", id: 34},
+      { type: "JAIL", id: 16},
+      { type: "JAIL", id: 33},
+      { type: "JAIL", id: 17},
+      { type: "JAIL", id: 32},
+      { type: "JAIL", id: 18},
+      { type: "JAIL", id: 31},
+      { type: "JAIL", id: 19},
+      { type: "JAIL", id: 30},
+      { type: "JAIL", id: 29},
+      { type: "JAIL", id: 28},
+      { type: "JAIL", id: 27},
+      { type: "JAIL", id: 26},
+      { type: "JAIL", id: 25},
+      { type: "JAIL", id: 24},
+      { type: "JAIL", id: 23},
+      { type: "JAIL", id: 22},
+      { type: "JAIL", id: 21},
+      { type: "JAIL", id: 20},
     ];
 
   const initialState: GameState = {
@@ -42,43 +73,6 @@ type Player = {
   };
 
 
-type Property = {
-    name: string;
-    type: "PROPERTY";
-    price: number;
-    rent: number;
-    houses: number;
-}
-
-type ChanceCard = {
-    type: "CHANCE_CARD";
-}
-
-type Pay = {
-    type: "PAY";
-    classicmoney: number;
-}
-
-type Tax = {
-    type: "TAX";
-    percent: number;
-    money: number;
-}
-
-type Jail = {
-    type: "JAIL";
-}
-
-type Start = {
-    type: "START";
-    money: number;
-}
-
-type AntiMonopolyOffice = {
-    type: "ANTI_MONOPOLY_OFFICE";
-}
-
-type Field = Property | ChanceCard | Pay | Jail | Start | AntiMonopolyOffice | Tax;
 
 type Action =
   | { type: "MOVE_PLAYER"; playerId: number; rollValue: number }

@@ -1,7 +1,7 @@
 .board {
     display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    grid-template-rows: repeat(6, 1fr);
+    grid-template-columns: repeat(11, 1fr);
+    grid-template-rows: repeat(11, 1fr);
     height: 100vh;
     width: 100vh;
 }
@@ -14,6 +14,13 @@
     border: 1px solid black;
     grid-row-end: span 1;
     grid-column-end: span 1;
+}
+
+.blank_field{
+    grid-row-start: 2;
+    grid-row-end: 11; 
+    grid-column-start: 2;
+    grid-column-end: 11; 
 }
 
 .player{
