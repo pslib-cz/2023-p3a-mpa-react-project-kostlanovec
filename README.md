@@ -2,12 +2,11 @@
 
 ## Téma
 Tady bude krátký a úderný popis o účelu, významu, funkcionalitě...
-Antimonopoly je společenská hra inspirovaná Monopoly, ale s odlišnými pravidly. Máte na výběr dvě role, buď budete monopolista nebo konkurent. Oba mají jiný styl hry.  Konkurenti prodávají více, ale za ceny, které určí trh. Monopolisté si sice mohou ceny diktovat, ale je velmi obtížné monopol vybudovat. Styl je hraní je podstatně jiný, takže hráč si může vyzkoušet obě role. Mým cílem to bude udělat tak, aby se využívalo stejných vlastností. Bude se hrát na stejném zařízení a vždy se hráči ukáže popup okínko s možnosti, jestli může koupit atd. 
-https://www.amazon.com/University-Games-1851-Anti-Monopoly/dp/B0007Q1J9I
+Antimonopoly je společenská hra inspirovaná Monopoly, ale s odlišnými pravidly. Máte na výběr dvě role, buď budete monopolista nebo konkurent. Oba mají jiný styl hry.  Konkurenti prodávají více, ale za ceny, které určí trh. Monopolisté si sice mohou ceny diktovat, ale je velmi obtížné monopol vybudovat. Styl je hraní je podstatně jiný, takže hráč si může vyzkoušet obě role. Mým cílem to bude udělat tak, aby se využívalo stejných vlastností. Bude se hrát na stejném zařízení a vždy se hráči ukáže popup okínko s možnosti, jestli může koupit atd. [Obrázek hry}(https://www.amazon.com/University-Games-1851-Anti-Monopoly/dp/B0007Q1J9I)
 ## Odkazy pro vývoj
 
 Zde budou živé linky na:
-- figma návrh stránek aplikace
+- [figma návrh stránek aplikace](https://www.figma.com/file/7aOytndegFgeOyqWfMGZd1/Untitled?type=design&node-id=0%3A1&mode=design&t=Dc2NjVutnCt1RiLT-1)
 - odkaz na gh-pages projektu
 - odkaz do repozitáře projektu, pokud pracuji v teamu a zde vývoj neprobíhá
 
