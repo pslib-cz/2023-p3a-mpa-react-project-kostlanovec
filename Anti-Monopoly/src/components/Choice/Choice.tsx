@@ -23,7 +23,7 @@ const Choice = ({ id, role, onRemove, onToggleRole, canRemove }: { id: number, r
                     e.stopPropagation();
                     onRemove();
                 }}>
-                    X
+                    <img src="img/cross-line.svg"></img>
                 </div>
             )}
         </figure>

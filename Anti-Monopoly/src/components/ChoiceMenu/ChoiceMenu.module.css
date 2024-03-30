@@ -28,12 +28,12 @@
 
 .a--playing{
     background: linear-gradient(45deg, #FF0000 0%, #990000 100%);
-    font-size: 1.5rem;
+    font-size: 2em;
     padding: 1rem 2rem;
     border: none;
     cursor: pointer;
     transition: all 0.3s;
-    width: 500px;
+    width: 300px;
     color: white;
     font-weight: bold;
     text-align: center;
