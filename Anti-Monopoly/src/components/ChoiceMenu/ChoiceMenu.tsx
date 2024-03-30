@@ -2,7 +2,6 @@ import React, { useContext, useState } from "react";
 import { Link } from "react-router-dom";
 import Choice from "../Choice/Choice";
 import styles from "../ChoiceMenu/ChoiceMenu.module.css";
-import { Role } from './../../types/type';
 import { SettingsContext } from "../../providers/SettingsProvider";
 
 const ChoiceMenu = () => {
@@ -35,15 +34,17 @@ const ChoiceMenu = () => {
                         onToggleRole={() => toggleRole(player.id)}
                         canRemove={index === players.length - 1 && players.length > 2}
                     />
-                    
-                
                 ))}
-                {players.length < 6 &&
-                        <figure><div className={styles["add--figure"]} onClick={addPlayer} ></div></figure>
-                    }
+                {players.length < 6 && (
+                    <figure>
+                        <div className={styles["add--figure"]} onClick={addPlayer}>
+                            <img src="/img/plus.svg" />
+                        </div>
+                    </figure>
+                )}
             </div> 
-           <div className={styles["div--link"]}>
-            <Link className={styles["a--playing"]} to="/playing">Start</Link>
+            <div className={styles["div--link"]}>
+                <Link className={styles["a--playing"]} to="/playing">Start</Link>
             </div>
         </div>
     );

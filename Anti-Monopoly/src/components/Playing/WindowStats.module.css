@@ -1,0 +1,16 @@
+.current-player{
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    width: 100%;
+    margin-top: 2em;
+}
+
+.current-player--stats > img{
+    border-radius: 360px;
+}
+
+.current-player--stats{
+    max-width: 200px;
+    margin: 0 auto;
+}

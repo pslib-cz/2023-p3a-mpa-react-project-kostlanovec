@@ -24,7 +24,7 @@ type Player = {
 
     const initialFields: Field[] = [
       { type: "START", money: 200, id: 1 },
-      { name: "Property 1", type: "PROPERTY", price: 100, rent: 10, houses: 0, id: 2},
+      { type: "PROPERTY", name: "Property 1" ,price: 100, rent: 10, houses: 0, id: 2},
       { type: "PAY", classicmoney: 5000, id: 3},
       { type: "TAX", percent: 20, money: 100, id:4 },
       { name: "Property 10", type: "PROPERTY", price: 100, rent: 10, houses: 0, id: 5},
@@ -34,24 +34,27 @@ type Player = {
       { type: "PROPERTY", name: "Property 3", price: 100, rent: 20, houses: 0, id: 9},
       { type: "ANTI_MONOPOLY_OFFICE", id: 10},
       { type: "ANTI_MONOPOLY_OFFICE", id: 11},
-      { type: "PROPERTY", name: "Property 4", price: 100, rent: 20, houses: 0, id: 39},
-      { type: "PAY", classicmoney: 50, id: 11},
-      { type: "PROPERTY", name: "Property 5", price: 100, rent: 20, houses: 0, id: 38},
-      { type: "JAIL", id: 12},
+
+      { type: "PROPERTY", name: "Property 4", price: 100, rent: 20, houses: 0, id: 40},
+      { type: "PAY", classicmoney: 50, id: 12},
+      { type: "PROPERTY", name: "Property 5", price: 100, rent: 20, houses: 0, id: 39},
+      { type: "JAIL", id: 13},
+      { type: "JAIL", id: 38},
+      { type: "PROPERTY", name: "Property 6", price: 100, rent: 20, houses: 0, id: 14},
       { type: "JAIL", id: 37},
-      { type: "PROPERTY", name: "Property 6", price: 100, rent: 20, houses: 0, id: 13},
-      { type: "JAIL", id: 36},
-      { type: "JAIL", id: 14},
-      { type: "JAIL", id: 35},
       { type: "JAIL", id: 15},
-      { type: "JAIL", id: 34},
+      { type: "JAIL", id: 36},
       { type: "JAIL", id: 16},
-      { type: "JAIL", id: 33},
+      { type: "JAIL", id: 35},
       { type: "JAIL", id: 17},
-      { type: "JAIL", id: 32},
+      { type: "JAIL", id: 34},
       { type: "JAIL", id: 18},
-      { type: "JAIL", id: 31},
+      { type: "JAIL", id: 33},
       { type: "JAIL", id: 19},
+      { type: "JAIL", id: 32},
+      { type: "JAIL", id: 20},
+
+      { type: "JAIL", id: 31},
       { type: "JAIL", id: 30},
       { type: "JAIL", id: 29},
       { type: "JAIL", id: 28},
@@ -62,7 +65,7 @@ type Player = {
       { type: "JAIL", id: 23},
       { type: "JAIL", id: 22},
       { type: "JAIL", id: 21},
-      { type: "JAIL", id: 20},
+
     ];
 
   const initialState: GameState = {
@@ -75,13 +78,13 @@ type Player = {
 
 
 type Action =
-  | { type: "MOVE_PLAYER"; playerId: number; rollValue: number }
+  | { type: "MOVE_PLAYER"; playerId: number; newPositionId: number;}
   | { type: "INIT_PLAYERS"; defaultMoney: number; defaultPosition: number; players: Player[] }
-  | {type: "BUY_PROPERTY"; playerId: number; fieldIndex: number, price: number}
+  | {type: "BUY_PROPERTY"; playerId: number; fieldId: number, price: number}
   | {type: "PAY_MONEY"; playerId: number; money: number}
   | {type: "PAY_TAX"; playerId: number; money: number}
   | {type: "CHANCE_CARD"; playerId: number;}
-  | { type: "SELL_PROPERTY"; playerId: number; fieldIndex: number; price: number }
+  | { type: "SELL_PROPERTY"; playerId: number; fieldId: number; price: number }
   | { type: "DECLARE_BANKRUPTCY"; playerId: number; }
 
   const playingReducer = (state: GameState, action: Action): GameState => {
@@ -99,51 +102,59 @@ type Action =
           players: playersInit,
         };
   
-      case "MOVE_PLAYER":
-        const playerMoving = state.players.find(p => p.id === action.playerId);
-        if (playerMoving) {
-          let newPosition = (playerMoving.position + action.rollValue) % state.fields.length;
-          let updatedPlayers = state.players.map(p =>
-            p.id === action.playerId
-              ? { ...p, position: newPosition }
-              : p
-          );
-
-          
-          const field = state.fields[newPosition];
-          switch (field.type) {
-            case "START":
-              playerMoving.money += field.money;
-              break;
-            case "PAY":
-              updatedPlayers = updatedPlayers.map(p =>
-                p.id === action.playerId
-                  ? { ...p, money: p.money - field.classicmoney }
-                  : p
-              );
-              break;
-            case "PROPERTY":
-              const propertyOwner = state.ownership[newPosition];
-              if (propertyOwner && propertyOwner !== action.playerId) {
-                  const rentAmount = field.rent;
-                  updatedPlayers = updatedPlayers.map(p => {
-                    if (p.id === action.playerId) {
-                      return { ...p, money: p.money - rentAmount };
-                    } else if (p.id === propertyOwner) {
-                      return { ...p, money: p.money + rentAmount };
-                    }
-                    return p;
-                  });
+        case "MOVE_PLAYER": {
+          const playerMoving = state.players.find(p => p.id === action.playerId);
+          if (playerMoving) {
+            const newPositionId = action.newPositionId; 
+        
+            let updatedPlayers = state.players.map(p =>
+              p.id === action.playerId
+                ? { ...p, position: newPositionId }
+                : p
+            );
+        
+            const field = state.fields.find(f => f.id === newPositionId);
+            if (field) {
+              switch (field.type) {
+                case "START":
+                  updatedPlayers = updatedPlayers.map(p =>
+                    p.id === action.playerId
+                      ? { ...p, money: p.money + field.money }
+                      : p
+                  );
+                  break;
+                case "PAY":
+                  updatedPlayers = updatedPlayers.map(p =>
+                    p.id === action.playerId
+                      ? { ...p, money: p.money - field.classicmoney }
+                      : p
+                  );
+                  break;
+                case "PROPERTY":
+                  const propertyOwner = state.ownership[newPositionId];
+                  if (propertyOwner && propertyOwner !== action.playerId) {
+                    console.log("platba");
+                    const rentAmount = field.rent;
+                    updatedPlayers = updatedPlayers.map(p => {
+                      if (p.id === action.playerId) {
+                        return { ...p, money: p.money - rentAmount };
+                      } else if (p.id === propertyOwner) {
+                        return { ...p, money: p.money + rentAmount };
+                      }
+                      return p;
+                    });
+                  }
+                  break;
               }
-              break;
+            }
+        
+            return {
+              ...state,
+              players: updatedPlayers,
+            };
           }
-  
-          return {
-            ...state,
-            players: updatedPlayers,
-          };
+          return state;
         }
-        return state;
   
       case 'PAY_MONEY':
         const payPlayer = state.players.find(p => p.id === action.playerId);
@@ -176,11 +187,10 @@ type Action =
         return state;
   
         case 'BUY_PROPERTY':
-          if (state.fields[action.fieldIndex].type === "PROPERTY") {
-            console.log("kupování")
+          if (state.fields[action.fieldId - 1].type === "PROPERTY") {
               return {
                   ...state,
-                  ownership: { ...state.ownership, [action.fieldIndex]: action.playerId },
+                  ownership: { ...state.ownership, [action.fieldId]: action.playerId },
                   players: state.players.map(p =>
                     p.id === action.playerId
                       ? { ...p, money: p.money - action.price }
