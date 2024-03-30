@@ -1,71 +1,48 @@
 import React, { PropsWithChildren, createContext, useReducer } from 'react';
-import { Role, Field,  } from '../types/type';
-
-
-type PlayingPlayer = {
-    id: number;
-    money: number;
-    role: Role;
-    position: number;
-    isBankrupt: boolean;
-};
-
-type Player = {
-    id: number;
-    role: Role;
-  }
-
-  type GameState = {
-    players: PlayingPlayer[];
-    isPlayingPlayerid : number;
-    fields: Field[];
-    ownership: { [key: number]: number };
-  };
+import { Role, Field, PlayingPlayer, Player, GameState  } from '../types/type';
 
     const initialFields: Field[] = [
       { type: "START", money: 200, id: 1 },
-      { type: "PROPERTY", name: "Property 1" ,price: 100, rent: 10, houses: 0, id: 2},
-      { type: "PAY", classicmoney: 5000, id: 3},
-      { type: "TAX", percent: 20, money: 100, id:4 },
-      { name: "Property 10", type: "PROPERTY", price: 100, rent: 10, houses: 0, id: 5},
-      { type: "PROPERTY", name: "Property 2", price: 100, rent: 20, houses: 0, id: 6},
-      { type: "JAIL", id: 7},
-      { type: "JAIL", id : 8},
-      { type: "PROPERTY", name: "Property 3", price: 100, rent: 20, houses: 0, id: 9},
-      { type: "ANTI_MONOPOLY_OFFICE", id: 10},
-      { type: "ANTI_MONOPOLY_OFFICE", id: 11},
-
-      { type: "PROPERTY", name: "Property 4", price: 100, rent: 20, houses: 0, id: 40},
-      { type: "PAY", classicmoney: 50, id: 12},
-      { type: "PROPERTY", name: "Property 5", price: 100, rent: 20, houses: 0, id: 39},
-      { type: "JAIL", id: 13},
-      { type: "JAIL", id: 38},
-      { type: "PROPERTY", name: "Property 6", price: 100, rent: 20, houses: 0, id: 14},
-      { type: "JAIL", id: 37},
-      { type: "JAIL", id: 15},
-      { type: "JAIL", id: 36},
-      { type: "JAIL", id: 16},
-      { type: "JAIL", id: 35},
-      { type: "JAIL", id: 17},
-      { type: "JAIL", id: 34},
-      { type: "JAIL", id: 18},
-      { type: "JAIL", id: 33},
-      { type: "JAIL", id: 19},
-      { type: "JAIL", id: 32},
-      { type: "JAIL", id: 20},
+      { type: "PROPERTY", city: "Řím", name: "Corso Impero", price: 60, rent: 6, houses: 0, id: 2},
+      { type: "CHANCE_CARD", id: 3 },
+      { type: "PROPERTY", name: "Via Roma", city: "Řím",   price: 60, rent: 60, houses: 0, id: 4},
+      { type: "TAX", percent: 20, money: 100, id:5 },
+      { type: "PROPERTY", name: "Letecká doprava", city: "Letecká doprava",  price: 200, rent: 20, houses: 0, id: 6},
+      { type: "PROPERTY", name: "Alexanderplatz", city: "Berlín",  price: 100, rent: 20, houses: 0, id: 7},
+      { type: "CHANCE_CARD", id: 8 },
+      { type: "PROPERTY", city: "Berlin", name: "Kurfürstendamm", price: 100, rent: 10, houses: 0, id: 9},
+      { type: "PROPERTY", city: "Berlin", name: "Potsdammer StraSe", price: 120, rent: 12, houses: 0, id: 10},
+      { type: "JAIL", id: 11},
+      { type: "PROPERTY", name: "Syntagma", city: "Athény", price: 400, rent: 40, houses: 0, id: 40},
+      { type: "PROPERTY", name: "Plaza Mayor", city: "Madrid", price: 140, rent: 14, houses: 0, id: 12},
+      { type: "PAY", classicmoney: 75, id: 39},
+      { type: "PROPERTY", name: "Elektrárna", city: "Elektrárna", price: 100, rent: 20, houses: 0, id: 13},
+      { type: "PROPERTY", name: "La Plaka", city: "Athény", price: 350, rent: 35, houses: 0, id: 38},
+      { type: "PROPERTY", name: "Gran Via", city: "Madrid", price: 140, rent: 14, houses: 0, id: 14},
+      {type: "CHANCE_CARD", id: 37 },
+      { type: "PROPERTY", name: "Paseo de la Castellana", city:"Madrid", price: 160, rent: 16, houses: 0, id: 15},
+      { type: "PROPERTY", name: "Autobusová doprava", city: "Autobusová doprava", price: 200, rent: 20, houses: 0, id: 36},
+      { type: "PROPERTY", name: "Tramvajová doprava", city: "Tramvajová doprava", price: 200, rent: 20, houses: 0, id: 16},
+      { type: "PROPERTY", name: "Oxford Street", city: "Londýn", price: 320, rent: 32, houses: 0, id: 35},
+      { type: "PROPERTY", name: "Dam", city: "Amsterdam", price: 180, rent: 18, houses: 0, id: 17},
+      {type: "CHANCE_CARD", id: 34 },
+      {type: "CHANCE_CARD", id: 18 },
+      { type: "PROPERTY", name: "Piccadilly", city: "Londýn", price: 300, rent:30, houses: 0, id: 33},
+      { type: "PROPERTY", name: "Leidsestraat", city: "Amsterdam", price: 180, rent: 18, houses: 0, id: 19},
+      { type: "PROPERTY", name: "Park Lane", city: "Londýn", price: 300, rent:30, houses: 0, id: 32},
+      { type: "PROPERTY", name: "Kalverstraat", city: "Amsterdam", price: 200, rent: 20, houses: 0, id: 20},
 
       { type: "JAIL", id: 31},
-      { type: "JAIL", id: 30},
-      { type: "JAIL", id: 29},
-      { type: "JAIL", id: 28},
-      { type: "JAIL", id: 27},
-      { type: "JAIL", id: 26},
-      { type: "JAIL", id: 25},
-      { type: "JAIL", id: 24},
-      { type: "JAIL", id: 23},
-      { type: "JAIL", id: 22},
-      { type: "JAIL", id: 21},
-
+      { type: "PROPERTY", name: "Nieuwstraat", city: "Brusel", price: 280, rent: 28, houses: 0, id: 30},
+      { type: "PROPERTY", name: "Plynárna", city: "Plynárna", price: 150, rent: 15, houses: 0, id: 29},
+      { type: "PROPERTY", name: "Hoogstraat", city: "Brusel", price: 260, rent: 26, houses: 0, id: 28},
+      { type: "PROPERTY", name: "Grote Markt", city: "Brusel", price: 260, rent: 26, houses: 0, id: 27},
+      { type: "PROPERTY", name: "Železniční doprava", city: "Železniční doprava", price: 240, rent: 24, houses: 0, id: 26},
+      { type: "PROPERTY", name: "ChampsElysees", city: "Paříž", price: 240, rent: 24, houses: 0, id: 25},
+      { type: "PROPERTY", name: "Rue de la Paix", city: "Paříž", price: 220, rent: 22, houses: 0, id: 24},
+      {type: "CHANCE_CARD", id: 23 },
+      { type: "PROPERTY", name: "Rue de la Fayette", city: "Paříž", price: 220, rent: 22, houses: 0, id: 22},
+      { type: "ANTI_MONOPOLY_OFFICE", id: 21},
     ];
 
   const initialState: GameState = {

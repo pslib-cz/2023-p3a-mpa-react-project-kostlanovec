@@ -3,21 +3,36 @@ export enum Role {
     MONOPOLIST = "MONOPOLIST"
 }
 
-type Player = {
+export type PlayingPlayer = {
     id: number;
     money: number;
     role: Role;
     position: number;
-}
+    isBankrupt: boolean;
+};
 
-type Property = {
+
+export type Property = {
     name: string;
+    city: string;
     type: "PROPERTY";
     price: number;
     rent: number;
     houses: number;
     id: number;
 }
+export type Player = {
+    id: number;
+    role: Role;
+  }
+
+  
+  export type GameState = {
+    players: PlayingPlayer[];
+    isPlayingPlayerid : number;
+    fields: Field[];
+    ownership: { [key: number]: number };
+  };
 
 type ChanceCard = {
     type: "CHANCE_CARD";

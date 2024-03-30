@@ -3,15 +3,7 @@ import styles from './Board.module.css';
 import Dice from "react-dice-roll";
 import { PlayingContext } from "../../providers/PlayingProvider";
 import { SettingsContext } from "../../providers/SettingsProvider";
-
-type Property = {
-    id: number;
-    name: string;
-    type: "PROPERTY";
-    price: number;
-    rent: number;
-    houses: number;
-}
+import { Property } from "../../types/type";
 
 const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: number, setCurrentPlayerId: (id: number) => void }) => {
     
@@ -20,11 +12,33 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
     const [showBuyPropertyDialog, setShowBuyPropertyDialog] = useState(false);
     const [showSellPropertyDialog, setShowSellPropertyDialog] = useState(false);
     const [nextPlayerId, setNextPlayerId] = useState(0);
+    const [hoveredFieldId, setHoveredFieldId] = useState<number | null>(null);
 
+    const handleMouseEnter = (fieldId: number) => {
+        setHoveredFieldId(fieldId);
+    };
+    
+    const handleMouseLeave = () => {
+        setHoveredFieldId(null);
+    };
+
+    const renderPropertyDetails = () => {
+        if (!hoveredFieldId) return null;
+        const hoveredField = fields.find(field => field.id === hoveredFieldId);
+        if (!hoveredField || hoveredField.type !== "PROPERTY") return null;
+
+        return (
+            <div className={styles["property-details"]} style={{ display: 'block' }}>
+                <h3>Detaily nemovitosti</h3>
+                <p>Název: {hoveredField.name}</p>
+                <p>Cena: {hoveredField.price}</p>
+            </div>
+        );
+    };
     const { fields } = playingState;
 
     useEffect(() => {
-        playingDispatch({ type: 'INIT_PLAYERS', defaultMoney: 100000, defaultPosition: 1, players: [...settingsState.players] });
+        playingDispatch({ type: 'INIT_PLAYERS', defaultMoney: 2000, defaultPosition: 1, players: [...settingsState.players] });
     }, [playingDispatch, settingsState.players]);
 
 
@@ -85,9 +99,7 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
             setCurrentPlayerId(nextPlayerId);
             setNextPlayerId(0);
         }
-        
     };
-
 
     const findPropertiesOwnedByPlayer = (playerId: number) => {
         return fields.filter((_, index) => playingState.ownership[index] === playerId);
@@ -131,11 +143,13 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
             <div className={styles["playing--zone"]}>
                 <div className={styles["board"]}>
                 {fields.map((field) => (
-        <div className={styles["field"]} key={field.id} id={String(field.id)}>
+        <div className={styles["field"]} key={field.id} id={String(field.id)}
+        onMouseEnter={() => field.type === "PROPERTY" && handleMouseEnter(field.id)}
+        onMouseLeave={handleMouseLeave}>
             {field.type === "PROPERTY" && (
                 <div>
                       <div>{field.name}</div>
-                    {/* Zobrazení vlastníka a názvu nemovitosti */}
+
                     {playingState.ownership[field.id] !== undefined && (
                         <div
                             className={styles["property-owner"]}
@@ -144,24 +158,23 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
                                     {playingState.players.find(player => player.id === playingState.ownership[field.id])?.id
                                         ? `HRÁČ ${playingState.players.find(player => player.id === playingState.ownership[field.id])?.id}`
                                         : ''}
-                                    {/* Přidání názvu nemovitosti */}
                                 </div>
                         </div>
                     )}
+                    <div>{field.price}</div>
                 </div>
             )}
-        {playingState.players.map((player, playerIndex) => (
-
-            player.position === field.id && (
-                <div
-                    key={playerIndex}
-                    className={styles["player"]}
-                    style={{ backgroundColor: getPlayerColor(playerIndex + 1) }}
-                ></div>
-            )
-        ))}
-    </div>
-))}
+            {playingState.players.map((player, playerIndex) => (
+                                player.position === field.id && (
+                                    <div
+                                        key={playerIndex}
+                                        className={styles["player"]}
+                                        style={{ backgroundColor: getPlayerColor(playerIndex + 1) }}
+                                    ></div>
+                                )
+                            ))}
+                        </div>
+                    ))}
 
                     <div className={styles["blank_field"]}></div>
                     {showBuyPropertyDialog && (
@@ -198,6 +211,7 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
                 <div className={styles["dices"]}>
                     <Dice size={100} onRoll={handleDiceRoll} />
                 </div>
+                {renderPropertyDetails()}
             </div>
         </>
     );

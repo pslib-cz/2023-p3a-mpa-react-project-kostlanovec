@@ -6,11 +6,17 @@
     margin-top: 2em;
 }
 
-.current-player--stats > img{
-    border-radius: 360px;
+.imground{
+    border-radius: 50%;
 }
 
 .current-player--stats{
     max-width: 200px;
     margin: 0 auto;
+}
+
+.other-players{
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    text-align: center;
 }
