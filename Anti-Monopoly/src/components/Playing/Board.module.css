@@ -1,7 +1,7 @@
 .board {
     display: grid;
-    grid-template-columns: repeat(11, 1fr);
-    grid-template-rows: repeat(11, 1fr);
+    grid-template-columns: repeat(13, 1fr);
+    grid-template-rows: repeat(13, 1fr);
     height: 100vh;
     width: 100vh;
 }
@@ -12,24 +12,28 @@
 
 .field {
     border: 1px solid black;
-    grid-row-end: span 1;
-    grid-column-end: span 1;
     background-color: #D3CEB3;
+    position: relative;
 }
 
 .blank_field{
-    grid-row-start: 2;
-    grid-row-end: 11; 
-    grid-column-start: 2;
-    grid-column-end: 11; 
+    grid-row-start: 3;
+    grid-row-end: 12; 
+    grid-column-start: 3;
+    grid-column-end: 12; 
+    position: relative;
+}
+
+.blank_field > img{
+    position: absolute;
 }
 
 .player{
     position: absolute;
     border-radius: 360px;
-    background-color: red;
     height: 20px;
     width: 20px;
+    top: 0;
 }
 
 .modal {
@@ -54,10 +58,27 @@
     z-index: 999;
 }
 
+.img-left {
+    transform: rotate(90deg) translateY(50%);
+}
+
+    
+.img-right {
+    transform: rotate(-90deg) translateX(-50%);
+    }
+
+.img-top {
+    transform: rotate(180deg);
+    }
+
+.img-bottom {
+    bottom: 0;
+    }
+
 .dices{
     position: absolute;
-    right: 50%;
-    top: 50%;
+    right: 20%;
+    bottom: 20%;
 }
 
 .property-details{
@@ -70,4 +91,47 @@
     z-index: 1000;
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin: 0;
+    padding: 0;
+}
+
+.grid-info{
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr;
+}
+
+.grid-info > *:nth-child(3n-3) {
+    text-align: right;
+  }
+  
+  .grid-info > *:nth-child(3n-2) {
+    text-align: left;
+  }
+  
+  .grid-info > *:nth-child(3n-1) {
+
+    text-align: center;
+  }
+
+.field--left{
+    grid-column: span 2;
+    
+}
+
+.field--right{
+    grid-column: span 2;
+}
+
+.field--top{
+
+    grid-row: span 2;
+}
+
+.field--bottom{
+    grid-row: span 2;
+}
+
+.field--bigger{
+    grid-row: span 2;
+    grid-column: span 2;
 }

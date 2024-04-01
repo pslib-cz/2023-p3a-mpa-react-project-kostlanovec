@@ -5,14 +5,27 @@ import { PlayingContext } from "../../providers/PlayingProvider";
 import { SettingsContext } from "../../providers/SettingsProvider";
 import { Property } from "../../types/type";
 
+const city = [
+    { id: 100, name: "Řím", color: "light-green", pricehouse: 50,},
+    { id: 101, name: "Berlín", color: "brown", pricehouse: 50,},
+    { id: 102, name: "Athény", color: "pink", pricehouse: 100,},
+    { id: 103, name: "Madrid", color: "dark-green", pricehouse: 100,},
+    { id: 104, name: "Londýn", color: "blue", pricehouse: 150,},
+    { id: 105, name: "Amsterdam", color: "purple", pricehouse: 150,},
+    { id: 106, name: "Brusel", color: "yellow", pricehouse: 200,},
+    { id: 107, name: "Paříž", color: "orange", pricehouse: 200,},
+    // vlastnost monopolistAddPrice by se dala zjistit z pricehouse, jelikož je to 1/5 a u konkurenta je to 1/10
+  ]
+
 const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: number, setCurrentPlayerId: (id: number) => void }) => {
-    
     const [settingsState] = useContext(SettingsContext);
     const [playingState, playingDispatch] = useContext(PlayingContext);
-    const [showBuyPropertyDialog, setShowBuyPropertyDialog] = useState(false);
+    const [showBuyPropertyDialog, setShowBuyPropertyDialog] = useState<boolean>(false);
     const [showSellPropertyDialog, setShowSellPropertyDialog] = useState(false);
     const [nextPlayerId, setNextPlayerId] = useState(0);
     const [hoveredFieldId, setHoveredFieldId] = useState<number | null>(null);
+    const [showBuyHouseDialog, setShowBuyHouseDialog] = useState(false);
+    const [selectedPropertyForHouse, setSelectedPropertyForHouse] = useState<Number>(0);
 
     const handleMouseEnter = (fieldId: number) => {
         setHoveredFieldId(fieldId);
@@ -26,12 +39,29 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
         if (!hoveredFieldId) return null;
         const hoveredField = fields.find(field => field.id === hoveredFieldId);
         if (!hoveredField || hoveredField.type !== "PROPERTY") return null;
-
+        const propertyCity = city.find(c => c.id === hoveredField.cityid);
+    
         return (
             <div className={styles["property-details"]} style={{ display: 'block' }}>
-                <h3>Detaily nemovitosti</h3>
-                <p>Název: {hoveredField.name}</p>
-                <p>Cena: {hoveredField.price}</p>
+                <div style={{ backgroundColor: propertyCity?.color}}>
+                    <h2>{propertyCity?.name}</h2>
+                    <h2>{hoveredField.name}</h2>
+                </div>
+                <div className={styles["grid-info"]}>
+                <h3>Konkurent</h3>
+                <p></p>
+                <h3>Monopolista</h3>
+                <p>{hoveredField.price}</p>
+                <p>cena pozemku</p>
+                <p>{hoveredField.price}</p>
+                <p>{propertyCity?.pricehouse}</p>
+                <p>cena domu</p>
+                <p>{propertyCity?.pricehouse}</p>
+                <div></div>
+                <h2>Nájemné</h2>
+                <div></div>
+
+                </div>
             </div>
         );
     };
@@ -40,7 +70,6 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
     useEffect(() => {
         playingDispatch({ type: 'INIT_PLAYERS', defaultMoney: 2000, defaultPosition: 1, players: [...settingsState.players] });
     }, [playingDispatch, settingsState.players]);
-
 
     useEffect(() => {
         const currentPlayer = playingState.players.find(player => player.id === currentPlayerId);
@@ -70,19 +99,21 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
             } else {
                 setCurrentPlayerId((playerId % playingState.players.length) + 1);
             }
-        } else {
+        }
+        else if (landedField && landedField.type === "PROPERTY" && playingState.ownership[landedField.id] === currentPlayerId) {
+            setShowBuyHouseDialog(true);
+            setSelectedPropertyForHouse(landedField.id);
+        }
+        else{
             setCurrentPlayerId((playerId % playingState.players.length) + 1);
         }
     };
-    
     
     const handleDialogResponse = (response: boolean) => {
         if (response) {
     
             const newPositionId = playingState.players.find(player => player.id === currentPlayerId)?.position || 0;
-            console.log(newPositionId);
             const propertyField = fields.find(field => field.id === newPositionId) as Property;
-            console.log(propertyField);
             if (propertyField && propertyField.type === "PROPERTY" && playingState.ownership[newPositionId] === undefined) {
                 const propertyPrice = propertyField.price;
                 playingDispatch({
@@ -138,12 +169,28 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
         setCurrentPlayerId((playerId % playingState.players.length) + 1);
     };
 
+    const handleBuyHouse = (fieldId: number) => {
+        const field = fields[fieldId - 1];
+        if (field.type === "PROPERTY") {
+            const housePrice = city.find(c => c.id === field.cityid)?.pricehouse;
+            if (housePrice) {
+                playingDispatch({
+                    type: "BUY_HOUSE",
+                    playerId: currentPlayerId,
+                    fieldId: fieldId,
+                    houseCount: 1,
+                });
+            }
+        }
+        setShowBuyHouseDialog(false);
+    };
+
     return (
         <>
             <div className={styles["playing--zone"]}>
                 <div className={styles["board"]}>
                 {fields.map((field) => (
-        <div className={styles["field"]} key={field.id} id={String(field.id)}
+        <div className={`${styles["field"]} ${getFieldClass(field.id)}`} key={field.id} id={String(field.id)}
         onMouseEnter={() => field.type === "PROPERTY" && handleMouseEnter(field.id)}
         onMouseLeave={handleMouseLeave}>
             {field.type === "PROPERTY" && (
@@ -164,6 +211,30 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
                     <div>{field.price}</div>
                 </div>
             )}
+            
+            {field.type === "CHANCE_CARD" && (
+                <img src="img/changecard.svg"></img>)}
+            {field.type === "PAY" && (
+                <p>Zaplať {field.classicmoney}</p>
+            )}
+            {field.type === "TAX" && (
+                <p>Daně {field.money}</p>
+            )}
+            {field.type === "JAIL" && (
+                <img src="img/jail.svg"></img>
+            )}
+            {field.type === "START" && (
+                <>
+                <p>Start</p>
+                <p>Dostaneš {field.money}</p>
+                </>
+            )}
+
+            {field.type === "ANTI_MONOPOLY_OFFICE" && (
+                <>
+                <p>Anti-monopolní úřad</p>
+                </>
+            )}
             {playingState.players.map((player, playerIndex) => (
                                 player.position === field.id && (
                                     <div
@@ -176,7 +247,14 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
                         </div>
                     ))}
 
-                    <div className={styles["blank_field"]}></div>
+                    <div className={styles["blank_field"]}>
+                        
+  {/* <img src="img/city.png" alt="Obrázek vlevo" className={styles["img-left"]} />
+  <img src="img/city.png" alt="Obrázek vpravo" className={styles["img-right"]} />
+  <img src="img/city.png" alt="Obrázek nahoře" className={styles["img-top"]} />
+  <img src="img/city.png" alt="Obrázek dole" className={styles["img-bottom"]} /> */}
+
+                    </div>
                     {showBuyPropertyDialog && (
                         <div className={styles.overlay}>
                             <div className={styles.modal}>
@@ -206,7 +284,15 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
                             </div>
                         </div>
                     )}
-
+{showBuyHouseDialog && (
+    <div className={styles.overlay}>
+        <div className={styles.modal}>
+            <p>Koupit dům za {city.find(c => c.id === fields[selectedPropertyForHouse as number - 1]?.id)?.pricehouse}?</p>
+            <button onClick={() => handleBuyHouse(selectedPropertyForHouse as number)}>Koupit</button>
+            <button onClick={() => setShowBuyHouseDialog(false)}>Zrušit</button>
+        </div>
+    </div>
+)}
                 </div>
                 <div className={styles["dices"]}>
                     <Dice size={100} onRoll={handleDiceRoll} />
@@ -221,4 +307,22 @@ function getPlayerColor(playerIndex: number) {
     return playerIndex === 0 ? 'red' : 'blue';
 }
 
+function getFieldClass(fieldId: number) {
+    if (fieldId >= 2 && fieldId <= 10) {
+        return styles["field--top"];
+    } else if (fieldId >= 12 && fieldId <= 20) {
+        return styles["field--right"];
+    }
+    else if (fieldId >= 22 && fieldId <= 30) {
+        return styles["field--bottom"];
+    } else if (fieldId >= 32 && fieldId <= 40) {
+        return styles["field--left"];
+    }
+    else if (fieldId == 1 || fieldId == 11 || fieldId == 21 || fieldId == 31) {
+        return styles["field--bigger"];
+    }
+    else {
+        return "";
+    }
+}
 export default Board;

@@ -14,7 +14,7 @@ export type PlayingPlayer = {
 
 export type Property = {
     name: string;
-    city: string;
+    cityid: number;
     type: "PROPERTY";
     price: number;
     rent: number;
@@ -68,4 +68,14 @@ type AntiMonopolyOffice = {
     id: number;
 }
 
-export type Field = Property | ChanceCard | Pay | Jail | Start | AntiMonopolyOffice | Tax;
+type Energy = {
+    type: "Energy";
+    id: number;
+}
+
+type Transport = {
+    type: "Transport";
+    id: number;
+}
+
+export type Field = Property | ChanceCard | Pay | Jail | Start | AntiMonopolyOffice | Tax | Energy | Transport;
