@@ -27,7 +27,7 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
         if (!hoveredFieldId) return null;
         const hoveredField = fields.find(field => field.id === hoveredFieldId);
         if (!hoveredField || hoveredField.type !== "PROPERTY") return null;
-        const propertyCity = cities.find(c => c.id === hoveredField.cityid);
+        const propertyCity = cities.find(c => c.id === hoveredField.cityid) || null;
 
         return (
             <div className={styles["property-details"]} style={{ display: 'block' }}>
@@ -48,6 +48,31 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
                     <div></div>
                     <h2>Nájemné</h2>
                     <div></div>
+                    <div>{hoveredField.price / 10}</div>
+                    <p>za pozemek</p>
+                    <div>{hoveredField.price / 10}</div>
+                    <div></div>
+                    <div>{hoveredField.price / 5} pokud hráč vlastní 2 ulice</div>
+                    <div></div>
+                    <p>{hoveredField.price / 10 + (propertyCity?.pricehouse  ?? 0) / 10} </p>
+                    <p>s 1 domem</p>
+                    <p>{hoveredField.price / 5 + (propertyCity?.pricehouse  ?? 0) / 5}</p>
+                    <p>{hoveredField.price / 10 + (propertyCity?.pricehouse ?? 0) / 5}</p>
+                    <p>se 2 domy</p>
+                    <p>{hoveredField.price / 5 + (propertyCity?.pricehouse  ?? 0) / 2.5}</p>
+                    <p>{hoveredField.price / 10 + ((propertyCity?.pricehouse ?? 0) / 5) + ((propertyCity?.pricehouse ?? 0) / 10)}</p>
+                    <p>se 3 domy</p>
+                    <p>{hoveredField.price / 5 + ((propertyCity?.pricehouse  ?? 0) / 2.5 ) +  ((propertyCity?.pricehouse ?? 0) / 5)}</p>
+                    <p>{hoveredField.price / 10 + ((propertyCity?.pricehouse ?? 0) / 5) + ((propertyCity?.pricehouse ?? 0) / 5)}</p>
+                    <p>se 4 domy</p>
+                    <p>{hoveredField.price / 5 + ((propertyCity?.pricehouse  ?? 0) / 2.5 ) +  ((propertyCity?.pricehouse ?? 0) / 2.5)}</p>
+                    <div></div>
+                    <div></div>
+                    <p>s 1 hotelem</p>
+                    <p>{hoveredField.price / 10 + ((propertyCity?.pricehouse ?? 0) / 5) + ( 3 * (propertyCity?.pricehouse ?? 0) / 10)}</p>
+                    <p>s 5 domy</p>
+                    <div></div>
+                    <p>s 1 hotelem</p>
                 </div>
             </div>
         );

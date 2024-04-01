@@ -180,7 +180,6 @@ const playingReducer = (state: GameState, action: Action): GameState => {
       }
       return state;
 
-
     case "CHANCE_CARD": {
       const playerIndex = state.players.findIndex(p => p.id === action.playerId);
       if (playerIndex !== -1) {
@@ -242,7 +241,6 @@ const playingReducer = (state: GameState, action: Action): GameState => {
       return state;
   }
 };
-
 
 export const PlayingContext = createContext<[GameState, React.Dispatch<Action>]>([initialState, () => null]);
 
