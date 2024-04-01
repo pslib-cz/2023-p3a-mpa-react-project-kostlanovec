@@ -54,6 +54,7 @@ type Action =
   | { type: "CHANCE_CARD"; playerId: number; }
   | { type: "SELL_PROPERTY"; playerId: number; fieldId: number; price: number }
   | { type: "DECLARE_BANKRUPTCY"; playerId: number; }
+  | { type: "SELL_HOUSES"; playerId: number; fieldId: number; houseCount: number };
 
 const initialState: GameState = {
   players: [],
@@ -223,6 +224,9 @@ const playingReducer = (state: GameState, action: Action): GameState => {
 
       return state;
 
+      case "SELL_HOUSES":
+
+        return state;
     case 'DECLARE_BANKRUPTCY':
       const updatedOwnership = { ...state.ownership };
       Object.keys(updatedOwnership).forEach(y => {
