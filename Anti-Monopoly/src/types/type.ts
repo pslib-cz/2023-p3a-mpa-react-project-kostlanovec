@@ -84,8 +84,11 @@ type Energy = {
 }
 
 type Transport = {
-    type: "Transport";
+    type: "TRANSPORT";
     id: number;
-}
+    name: string;
+    price: number;
+    rent: number;
+};
 
 export type Field = Property | ChanceCard | Pay | Jail | Start | AntiMonopolyOffice | Tax | Energy | Transport;

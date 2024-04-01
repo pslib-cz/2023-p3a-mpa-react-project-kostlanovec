@@ -105,7 +105,7 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
         playingDispatch({ type: 'MOVE_PLAYER', playerId, newPositionId: newPositionId });
 
         const landedField = fields.find(field => field.id === newPositionId);
-        if (landedField && landedField.type === "PROPERTY" && playingState.ownership[landedField.id] === undefined) {
+        if (landedField && landedField.type === "PROPERTY"&& playingState.ownership[landedField.id] === undefined) {
             const propertyPrice = landedField.price;
             if ((currentPlayer.money ?? 0) >= propertyPrice) {
                 setShowBuyPropertyDialog(true);
@@ -196,6 +196,7 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
             }
         }
         setShowBuyHouseDialog(false);
+        setCurrentPlayerId((currentPlayerId % playingState.players.length) + 1);
     };
 
     return (

@@ -7,7 +7,7 @@ const initialFields: Field[] = [
   { type: "CHANCE_CARD", id: 3 },
   { type: "PROPERTY", name: "Via Roma", cityid: 100, price: 60, rent: 60, houses: 0, id: 4 },
   { type: "TAX", percent: 20, money: 100, id: 5 },
-  { type: "PROPERTY", name: "Letecká doprava", cityid: 100, price: 200, rent: 20, houses: 0, id: 6 },
+  { type: "TRANSPORT", name: "Letecká doprava", price: 200, rent: 20, id: 6 },
   { type: "PROPERTY", name: "Alexanderplatz", cityid: 101, price: 100, rent: 20, houses: 0, id: 7 },
   { type: "CHANCE_CARD", id: 8 },
   { type: "PROPERTY", cityid: 101, name: "Kurfürstendamm", price: 100, rent: 10, houses: 0, id: 9 },
@@ -21,7 +21,7 @@ const initialFields: Field[] = [
   { type: "PROPERTY", name: "Gran Via", cityid: 103, price: 140, rent: 14, houses: 0, id: 14 },
   { type: "CHANCE_CARD", id: 37 },
   { type: "PROPERTY", name: "Paseo de la Castellana", cityid: 103, price: 160, rent: 16, houses: 0, id: 15 },
-  { type: "PROPERTY", name: "Autobusová doprava", cityid: 103, price: 200, rent: 20, houses: 0, id: 36 },
+  { type: "TRANSPORT", name: "Autobusová doprava", price: 200, rent: 20, id: 36 },
   { type: "PROPERTY", name: "Tramvajová doprava", cityid: 103, price: 200, rent: 20, houses: 0, id: 16 },
   { type: "PROPERTY", name: "Oxford Street", cityid: 104, price: 320, rent: 32, houses: 0, id: 35 },
   { type: "PROPERTY", name: "Dam", cityid: 105, price: 180, rent: 18, houses: 0, id: 17 },
@@ -36,7 +36,7 @@ const initialFields: Field[] = [
   { type: "PROPERTY", name: "Plynárna", cityid: 107, price: 150, rent: 15, houses: 0, id: 29 },
   { type: "PROPERTY", name: "Hoogstraat", cityid: 106, price: 260, rent: 26, houses: 0, id: 28 },
   { type: "PROPERTY", name: "Grote Markt", cityid: 106, price: 260, rent: 26, houses: 0, id: 27 },
-  { type: "PROPERTY", name: "Železniční doprava", cityid: 107, price: 240, rent: 24, houses: 0, id: 26 },
+  { type: "TRANSPORT", name: "Železniční doprava",  price: 240, rent: 24, id: 26 },
   { type: "PROPERTY", name: "ChampsElysees", cityid: 107, price: 240, rent: 24, houses: 0, id: 25 },
   { type: "PROPERTY", name: "Rue de la Paix", cityid: 107, price: 220, rent: 22, houses: 0, id: 24 },
   { type: "CHANCE_CARD", id: 23 },
@@ -107,19 +107,58 @@ const playingReducer = (state: GameState, action: Action): GameState => {
                   : p
               );
               break;
-            case "PROPERTY":
-              const propertyOwner = state.ownership[newPositionId];
-              if (propertyOwner && propertyOwner !== action.playerId) {
-                console.log("platba");
-                const rentAmount = field.rent;
-                updatedPlayers = updatedPlayers.map(p => {
-                  if (p.id === action.playerId) {
-                    return { ...p, money: p.money - rentAmount };
-                  } else if (p.id === propertyOwner) {
-                    return { ...p, money: p.money + rentAmount };
+              case "TRANSPORT": {
+                const transportOwner = state.ownership[newPositionId];
+                if (transportOwner && transportOwner !== action.playerId) {
+                  const transportPropertiesOwned = Object.keys(state.ownership).filter(
+                    key => state.ownership[parseInt(key)] === transportOwner && state.fields[parseInt(key) - 1].type === "TRANSPORT"
+                  ).length;
+              
+                  let rentAmount = 20;
+              
+                  if (transportPropertiesOwned > 1) {
+                    rentAmount = 40 * Math.pow(2, transportPropertiesOwned - 1);
                   }
-                  return p;
-                });
+                  rentAmount = Math.min(rentAmount, 320);
+                  updatedPlayers = updatedPlayers.map(p => {
+                    if (p.id === action.playerId) {
+                      return { ...p, money: p.money - rentAmount };
+                    } else if (p.id === transportOwner) {
+                      return { ...p, money: p.money + rentAmount };
+                    }
+                    return p;
+                  });
+                }
+              }
+              break;
+              
+              case "PROPERTY": {
+                const propertyOwner = state.ownership[newPositionId];
+                if (propertyOwner && propertyOwner !== action.playerId && field.type === "PROPERTY") {
+
+                  const propertiesOwnedByOwner = Object.keys(state.ownership)
+                    .filter(key => state.ownership[parseInt(key)] === propertyOwner)
+                    .map(key => state.fields[parseInt(key) - 1])
+                    .filter(field => field.type === "PROPERTY");
+              
+                  const isMonopoly = propertiesOwnedByOwner
+                    .filter(property => property.cityid === field.cityid).length > 1;
+              
+                  let rentAmount = field.rent;
+                  if (isMonopoly) {
+                    rentAmount *= 2;
+                  }
+              
+                  // Aktualizovat stav hráčů
+                  updatedPlayers = updatedPlayers.map(p => {
+                    if (p.id === action.playerId) {
+                      return { ...p, money: p.money - rentAmount };
+                    } else if (p.id === propertyOwner) {
+                      return { ...p, money: p.money + rentAmount };
+                    }
+                    return p;
+                  });
+                }
               }
               break;
           }
@@ -204,12 +243,18 @@ const playingReducer = (state: GameState, action: Action): GameState => {
         const field = state.fields[fieldIndex];
         const player = state.players[playerIndex];
         const housePrice = field.type === "PROPERTY" ? cities.find(city => city.id === field.cityid)?.pricehouse : undefined;
+    
+        const ownsOtherPropertiesInCity = state.fields.filter(f =>
+          f.type === "PROPERTY" && f.cityid === field.cityid && state.ownership[f.id] === action.playerId
+        ).length > 1;
+    
+    
         const totalCost = (housePrice || 0) * action.houseCount;
-
-        if (field.type === "PROPERTY" && player.money >= totalCost) {
+    
+        if (field.type === "PROPERTY" && player.money >= totalCost && ownsOtherPropertiesInCity) {
           field.houses += action.houseCount;
           player.money -= totalCost;
-
+    
           return {
             ...state,
             fields: [...state.fields.slice(0, fieldIndex), field, ...state.fields.slice(fieldIndex + 1)],
@@ -220,13 +265,44 @@ const playingReducer = (state: GameState, action: Action): GameState => {
       return state;
     }
 
-    case 'SELL_PROPERTY':
+    case 'SELL_PROPERTY': {
+      const updatedOwnership = { ...state.ownership };
+      delete updatedOwnership[action.fieldId];
+      
+      return {
+      ...state,
+      ownership: updatedOwnership,
+      players: state.players.map(p =>
+        p.id === action.playerId
+        ? { ...p, money: p.money + action.price }
+        : p
+      ),
+      };
+    }
 
+    case "SELL_HOUSES": {
+      const fieldIndex = state.fields.findIndex(field => field.id === action.fieldId);
+      const playerIndex = state.players.findIndex(player => player.id === action.playerId);
+      if (fieldIndex !== -1 && playerIndex !== -1) {
+      const field = state.fields[fieldIndex];
+      const player = state.players[playerIndex];
+      const housePrice = field.type === "PROPERTY" ? cities.find(city => city.id === field.cityid)?.pricehouse : undefined;
+      const totalCost = (housePrice || 0) * action.houseCount;
+
+      if (field.type === "PROPERTY" && field.houses >= action.houseCount) {
+        field.houses -= action.houseCount;
+        player.money += totalCost;
+
+        return {
+        ...state,
+        fields: [...state.fields.slice(0, fieldIndex), field, ...state.fields.slice(fieldIndex + 1)],
+        players: [...state.players.slice(0, playerIndex), player, ...state.players.slice(playerIndex + 1)],
+        };
+      }
+      }
       return state;
+    }
 
-      case "SELL_HOUSES":
-
-        return state;
     case 'DECLARE_BANKRUPTCY':
       const updatedOwnership = { ...state.ownership };
       Object.keys(updatedOwnership).forEach(y => {
