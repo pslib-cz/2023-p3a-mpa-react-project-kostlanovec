@@ -3,6 +3,16 @@ export enum Role {
     MONOPOLIST = "MONOPOLIST"
 }
 
+export const cities = [
+    { id: 100, name: "Řím", color: "light-green", pricehouse: 50 },
+    { id: 101, name: "Berlín", color: "brown", pricehouse: 50 },
+    { id: 102, name: "Athény", color: "pink", pricehouse: 100 },
+    { id: 103, name: "Madrid", color: "dark-green", pricehouse: 100 },
+    { id: 104, name: "Londýn", color: "blue", pricehouse: 150 },
+    { id: 105, name: "Amsterdam", color: "purple", pricehouse: 150 },
+    { id: 106, name: "Brusel", color: "yellow", pricehouse: 200 },
+    { id: 107, name: "Paříž", color: "orange", pricehouse: 200 },
+]
 export type PlayingPlayer = {
     id: number;
     money: number;
