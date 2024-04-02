@@ -135,3 +135,35 @@
     grid-row: span 2;
     grid-column: span 2;
 }
+
+.light-green{
+    background-color: aquamarine;
+}
+
+.brown{
+    background-color: brown;
+}
+
+.pink{
+    background-color: pink;
+}
+
+.dark-green{
+    background-color: green;
+}
+
+.blue{
+    background-color: blue;
+}
+
+.purple{
+    background-color: blueviolet;
+}
+
+.yellow{
+    background-color: yellow;
+}
+
+.orange{
+    background-color: orange;
+}

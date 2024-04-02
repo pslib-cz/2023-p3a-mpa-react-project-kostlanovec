@@ -13,6 +13,7 @@ export const cities = [
     { id: 106, name: "Brusel", color: "yellow", pricehouse: 200 },
     { id: 107, name: "Paříž", color: "orange", pricehouse: 200 },
 ]
+
 export type PlayingPlayer = {
     id: number;
     money: number;

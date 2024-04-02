@@ -30,8 +30,8 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
         const propertyCity = cities.find(c => c.id === hoveredField.cityid) || null;
 
         return (
-            <div className={styles["property-details"]} style={{ display: 'block' }}>
-                <div style={{ backgroundColor: propertyCity?.color }}>
+            <div className={styles["property-details"]}>
+                <div className={styles[(propertyCity?.color ?? '')]}>
                     <h2>{propertyCity?.name}</h2>
                     <h2>{hoveredField.name}</h2>
                 </div>
