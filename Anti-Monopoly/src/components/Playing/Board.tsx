@@ -23,6 +23,26 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
         setHoveredFieldId(null);
     };
 
+    const renderTransportDeatails = () => {
+        if (!hoveredFieldId) return null;
+        const hoveredField = fields.find(field => field.id === hoveredFieldId);
+        if (!hoveredField || hoveredField.type !== "TRANSPORT") return null;
+
+        return (
+            <div className={styles["transport-details"]}>
+                <h2>{hoveredField.name}</h2>
+                <h3>Poplatek</h3>
+                <p>{hoveredField.price}</p>
+                <h3>Poplatek s 2 stanicemi</h3>
+                <p>{hoveredField.price * 2}</p>
+                <h3>Poplatek s 3 stanicemi</h3>
+                <p>{hoveredField.price * 4}</p>
+                <h3>Poplatek se 4 stanicemi</h3>
+                <p>{hoveredField.price * 8}</p>
+            </div>
+        );
+    }
+    
     const renderPropertyDetails = () => {
         if (!hoveredFieldId) return null;
         const hoveredField = fields.find(field => field.id === hoveredFieldId);
@@ -231,6 +251,9 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
                                 </div>
                             )}
 
+                            {field.type === "TRANSPORT" && (
+                                <img src={`img/${field.image}`} />
+                            )}
                             {field.type === "CHANCE_CARD" && (
                                 <img src="img/changecard.svg"></img>)}
                             {field.type === "PAY" && (
@@ -316,6 +339,7 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
                     <Dice size={100} onRoll={handleDiceRoll} />
                 </div>
                 {renderPropertyDetails()}
+                {renderTransportDeatails()}
             </div>
         </>
     );

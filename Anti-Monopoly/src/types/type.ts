@@ -90,6 +90,7 @@ type Transport = {
     name: string;
     price: number;
     rent: number;
+    image: string;
 };
 
 export type Field = Property | ChanceCard | Pay | Jail | Start | AntiMonopolyOffice | Tax | Energy | Transport;
