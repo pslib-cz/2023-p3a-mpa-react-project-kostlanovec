@@ -1,9 +1,9 @@
 .board {
     display: grid;
-    grid-template-columns: repeat(13, 1fr);
-    grid-template-rows: repeat(13, 1fr);
+    grid-template-columns: repeat(11, calc(100% / 11));
+    grid-template-rows: repeat(11, calc(100vh / 11));
     height: 100vh;
-    width: 100vh;
+    width: 100%;
 }
 
 .playing--zone{
@@ -17,10 +17,10 @@
 }
 
 .blank_field{
-    grid-row-start: 3;
-    grid-row-end: 12; 
-    grid-column-start: 3;
-    grid-column-end: 12; 
+    grid-row-start: 2;
+    grid-row-end: 11; 
+    grid-column-start: 2;
+    grid-column-end: 11; 
     position: relative;
 }
 
@@ -62,7 +62,6 @@
     transform: rotate(90deg) translateY(50%);
 }
 
-    
 .img-right {
     transform: rotate(-90deg) translateX(-50%);
     }
@@ -81,6 +80,11 @@
     bottom: 20%;
 }
 
+.field > img{
+    width: 100%;
+    height: 100%;
+}
+
 .property-details{
     position: absolute;
     top: 50%;
@@ -93,6 +97,7 @@
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     margin: 0;
     padding: 0;
+    font-size: 10px;
 }
 
 .grid-info{
@@ -113,7 +118,7 @@
     text-align: center;
   }
 
-.field--left{
+/*.field--left{
     grid-column: span 2;
     
 }
@@ -134,7 +139,7 @@
 .field--bigger{
     grid-row: span 2;
     grid-column: span 2;
-}
+}*/
 
 .light-green{
     background-color: aquamarine;

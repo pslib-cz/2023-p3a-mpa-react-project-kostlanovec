@@ -41,9 +41,14 @@ export type Player = {
   export type GameState = {
     players: PlayingPlayer[];
     isPlayingPlayerid : number;
-    fields: Field[];
+    fields: FieldType[];
     ownership: { [key: number]: number };
   };
+
+  type Field = {
+    id: number;
+    type: FieldType;
+}
 
 type ChanceCard = {
     type: "CHANCE_CARD";
@@ -93,4 +98,4 @@ type Transport = {
     image: string;
 };
 
-export type Field = Property | ChanceCard | Pay | Jail | Start | AntiMonopolyOffice | Tax | Energy | Transport;
+export type FieldType = Property | ChanceCard | Pay | Jail | Start | AntiMonopolyOffice | Tax | Energy | Transport;

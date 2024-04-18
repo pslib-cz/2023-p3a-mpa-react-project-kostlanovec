@@ -9,10 +9,10 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
     const [settingsState] = useContext(SettingsContext);
     const [playingState, playingDispatch] = useContext(PlayingContext);
     const [showBuyPropertyDialog, setShowBuyPropertyDialog] = useState<boolean>(false);
-    const [showSellPropertyDialog, setShowSellPropertyDialog] = useState(false);
-    const [nextPlayerId, setNextPlayerId] = useState(0);
+    const [showSellPropertyDialog, setShowSellPropertyDialog] = useState<boolean>(false);
+    const [nextPlayerId, setNextPlayerId] = useState<number>(0);
     const [hoveredFieldId, setHoveredFieldId] = useState<number | null>(null);
-    const [showBuyHouseDialog, setShowBuyHouseDialog] = useState(false);
+    const [showBuyHouseDialog, setShowBuyHouseDialog] = useState<boolean>(false);
     const [selectedPropertyForHouse, setSelectedPropertyForHouse] = useState<Number>(0);
 
     const handleMouseEnter = (fieldId: number) => {
@@ -125,7 +125,7 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
         playingDispatch({ type: 'MOVE_PLAYER', playerId, newPositionId: newPositionId });
 
         const landedField = fields.find(field => field.id === newPositionId);
-        if (landedField && landedField.type === "PROPERTY"&& playingState.ownership[landedField.id] === undefined) {
+        if (landedField && landedField.type === "PROPERTY" || (landedField && landedField.type === "TRANSPORT" &&  playingState.ownership[landedField.id] === undefined)) {
             const propertyPrice = landedField.price;
             if ((currentPlayer.money ?? 0) >= propertyPrice) {
                 setShowBuyPropertyDialog(true);
@@ -133,10 +133,12 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
                 setCurrentPlayerId((playerId % playingState.players.length) + 1);
             }
         }
-        else if (landedField && landedField.type === "PROPERTY" && playingState.ownership[landedField.id] === currentPlayerId) {
+
+        else if (landedField && landedField.type === "PROPERTY" || landedField?.type === "TRANSPORT" && playingState.ownership[landedField.id] === currentPlayerId) {
             setShowBuyHouseDialog(true);
             setSelectedPropertyForHouse(landedField.id);
         }
+
         else {
             setCurrentPlayerId((playerId % playingState.players.length) + 1);
         }
@@ -180,7 +182,7 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
             const propertiesOwned = findPropertiesOwnedByPlayer(playerId);
             if (propertiesOwned.length > 0) {
                 const totalValueOfProperties = propertiesOwned.reduce((acc, property) => {
-                    if (property.type === "PROPERTY") {
+                    if (property.type === "PROPERTY" || property.type === "TRANSPORT") {
                         return acc + property.price;
                     }
                     return acc;
@@ -225,7 +227,7 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
                 <div className={styles["board"]}>
                     {fields.map((field) => (
                         <div
-                            className={`${styles["field"]} ${getFieldClass(field.id)}`}
+                            className={`${styles["field"]}`}
                             key={field.id}
                             id={String(field.id)}
                             onMouseEnter={() => field.type === "PROPERTY" && handleMouseEnter(field.id)}
@@ -250,7 +252,7 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
                                     <div>{field.price}</div>
                                 </div>
                             )}
-
+                            
                             {field.type === "TRANSPORT" && (
                                 <img src={`img/${field.image}`} />
                             )}
@@ -344,24 +346,5 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
         </>
     );
 };
-
-function getFieldClass(fieldId: number) {
-    if (fieldId >= 2 && fieldId <= 10) {
-        return styles["field--top"];
-    } else if (fieldId >= 12 && fieldId <= 20) {
-        return styles["field--right"];
-    }
-    else if (fieldId >= 22 && fieldId <= 30) {
-        return styles["field--bottom"];
-    } else if (fieldId >= 32 && fieldId <= 40) {
-        return styles["field--left"];
-    }
-    else if (fieldId == 1 || fieldId == 11 || fieldId == 21 || fieldId == 31) {
-        return styles["field--bigger"];
-    }
-    else {
-        return "";
-    }
-}
 
 export default Board;

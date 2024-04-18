@@ -10,7 +10,7 @@ const Playing = () => {
         <>
             <div className={styles["playing--layout"]}>
                 <Board currentPlayerId={currentPlayerId} setCurrentPlayerId={setCurrentPlayerId} />
-                <WindowsStats currentPlayerId={currentPlayerId} />
+            
             </div>
         </>
     );

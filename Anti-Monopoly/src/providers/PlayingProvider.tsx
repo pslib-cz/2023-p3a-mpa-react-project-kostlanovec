@@ -1,6 +1,7 @@
 import React, { PropsWithChildren, createContext, useReducer } from 'react';
 import { Field, PlayingPlayer, Player, GameState, cities } from '../types/type';
 
+// definování pole hráče.
 const initialFields: Field[] = [
   { type: "START", money: 200, id: 1 },
   { type: "PROPERTY", cityid: 100, name: "Corso Impero", price: 60, rent: 6, houses: 0, id: 2 },
@@ -149,7 +150,6 @@ const playingReducer = (state: GameState, action: Action): GameState => {
                     rentAmount *= 2;
                   }
               
-                  // Aktualizovat stav hráčů
                   updatedPlayers = updatedPlayers.map(p => {
                     if (p.id === action.playerId) {
                       return { ...p, money: p.money - rentAmount };
@@ -203,7 +203,7 @@ const playingReducer = (state: GameState, action: Action): GameState => {
       return state;
 
     case 'BUY_PROPERTY':
-      if (state.fields[action.fieldId - 1].type === "PROPERTY") {
+      if (state.fields[action.fieldId - 1].type === "PROPERTY" || state.fields[action.fieldId - 1].type === "TRANSPORT") {
         return {
           ...state,
           ownership: { ...state.ownership, [action.fieldId]: action.playerId },
