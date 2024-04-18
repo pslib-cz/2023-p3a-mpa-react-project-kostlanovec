@@ -2,11 +2,9 @@ import { useContext, useEffect, useState } from "react";
 import styles from './Board.module.css';
 import Dice from "react-dice-roll";
 import { PlayingContext } from "../../providers/PlayingProvider";
-import { SettingsContext } from "../../providers/SettingsProvider";
 import { Property, cities } from "../../types/type";
 
 const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: number, setCurrentPlayerId: (id: number) => void }) => {
-    const [settingsState] = useContext(SettingsContext);
     const [playingState, playingDispatch] = useContext(PlayingContext);
     const [showBuyPropertyDialog, setShowBuyPropertyDialog] = useState<boolean>(false);
     const [showSellPropertyDialog, setShowSellPropertyDialog] = useState<boolean>(false);
@@ -99,11 +97,6 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
     };
 
     const { fields } = playingState;
-
-    useEffect(() => {
-        playingDispatch({ type: 'INIT_PLAYERS', defaultMoney: 2000, defaultPosition: 1, players: [...settingsState.players] });
-    }, [playingDispatch, settingsState.players]);
-
     useEffect(() => {
         const currentPlayer = playingState.players.find(player => player.id === currentPlayerId);
         if (currentPlayer && !currentPlayer.isBankrupt) {

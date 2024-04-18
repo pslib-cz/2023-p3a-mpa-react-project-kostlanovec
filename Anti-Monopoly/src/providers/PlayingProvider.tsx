@@ -1,5 +1,7 @@
 import React, { PropsWithChildren, createContext, useReducer } from 'react';
-import { Field, PlayingPlayer, Player, GameState, cities } from '../types/type';
+import { Field, PlayingPlayer, Player, GameState, cities, Role } from '../types/type';
+
+
 
 // definování pole hráče.
 const initialFields: Field[] = [
@@ -55,10 +57,16 @@ type Action =
   | { type: "CHANCE_CARD"; playerId: number; }
   | { type: "SELL_PROPERTY"; playerId: number; fieldId: number; price: number }
   | { type: "DECLARE_BANKRUPTCY"; playerId: number; }
-  | { type: "SELL_HOUSES"; playerId: number; fieldId: number; houseCount: number };
+  | { type: "SELL_HOUSES"; playerId: number; fieldId: number; houseCount: number }
+  | { type: "ADD_PLAYER" }
+  | { type: "REMOVE_PLAYER"; payload: number }
+  | { type: "TOGGLE_ROLE"; payload: number };
 
 const initialState: GameState = {
-  players: [],
+  players: [
+    { id: 1, money: 1500, role: Role.MONOPOLIST, position: 1, isBankrupt: false },
+    { id: 2, money: 1500, role: Role.CONCURENT, position: 1, isBankrupt: false },
+  ],
   isPlayingPlayerid: 1,
   fields: initialFields,
   ownership: {},
@@ -302,6 +310,38 @@ const playingReducer = (state: GameState, action: Action): GameState => {
       }
       return state;
     }
+
+    case "ADD_PLAYER":
+      console.log("přidání hráče");
+      if (state.players.length < 6) {
+        const newPlayer: PlayingPlayer = {
+          id: state.players.length + 1,
+          role: Role.CONCURENT,
+          money: 1500,
+          position: 0,
+          isBankrupt: false
+        };
+        return { ...state, players: [...state.players, newPlayer] };
+      }
+      return state;
+
+    case "REMOVE_PLAYER":
+      if (state.players.length > 2) {
+        return { ...state, players: state.players.filter(player => player.id !== action.payload) };
+      }
+      return state;
+
+    case "TOGGLE_ROLE":
+      console.log("změna role")
+      return {
+        ...state,
+        players: state.players.map(player =>
+          player.id === action.payload
+            ? { ...player, role: player.role === Role.CONCURENT ? Role.MONOPOLIST : Role.CONCURENT }
+            : player
+        ),
+      };
+
 
     case 'DECLARE_BANKRUPTCY':
       const updatedOwnership = { ...state.ownership };

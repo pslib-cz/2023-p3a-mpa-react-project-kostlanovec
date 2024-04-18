@@ -1,6 +1,5 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import Board from "./Board";
-import WindowsStats from "./WindowStats";
 import styles from './Playing.module.css';
 
 const Playing = () => {

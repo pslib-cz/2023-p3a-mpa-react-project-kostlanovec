@@ -2,10 +2,10 @@ import { useContext} from "react";
 import { Link } from "react-router-dom";
 import Choice from "../Choice/Choice";
 import styles from "../ChoiceMenu/ChoiceMenu.module.css";
-import { SettingsContext } from "../../providers/SettingsProvider";
+import { PlayingContext } from "../../providers/PlayingProvider";
 
 const ChoiceMenu = () => {
-    const [state, dispatch] = useContext(SettingsContext);
+    const [state, dispatch] = useContext(PlayingContext);
     const { players } = state;
 
     const addPlayer = () => {
@@ -13,14 +13,12 @@ const ChoiceMenu = () => {
     };
 
     const removePlayer = (id: number) => {
-        console.log("smazání hráče")
         dispatch({ type: "REMOVE_PLAYER", payload: id });
     };
 
     const toggleRole = (id: number) => {
         dispatch({ type: "TOGGLE_ROLE", payload: id });
     };
-
 
     return (
         <div className={styles["choice--menu"]}>

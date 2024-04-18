@@ -118,29 +118,6 @@
     text-align: center;
   }
 
-/*.field--left{
-    grid-column: span 2;
-    
-}
-
-.field--right{
-    grid-column: span 2;
-}
-
-.field--top{
-
-    grid-row: span 2;
-}
-
-.field--bottom{
-    grid-row: span 2;
-}
-
-.field--bigger{
-    grid-row: span 2;
-    grid-column: span 2;
-}*/
-
 .light-green{
     background-color: aquamarine;
 }

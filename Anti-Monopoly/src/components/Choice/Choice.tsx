@@ -13,7 +13,6 @@ const Choice = ({ id, role, onRemove, onToggleRole, canRemove }: { id: number, r
     };
 
     const imageSrc = getImageForRole(role);
-
     return (
         <figure className={styles["choice--figure"]} onClick={onToggleRole}>
             <img src={imageSrc} alt={`Hráč ${id}`} />
