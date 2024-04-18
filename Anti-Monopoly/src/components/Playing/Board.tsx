@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import styles from './Board.module.css';
 import Dice from "react-dice-roll";
 import { PlayingContext } from "../../providers/PlayingProvider";
-import { Property, cities } from "../../types/type";
+import { Property, Start, Transport, cities, Tax, Pay } from "../../types/type";
 
 const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: number, setCurrentPlayerId: (id: number) => void }) => {
     const [playingState, playingDispatch] = useContext(PlayingContext);
@@ -21,11 +21,10 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
         setHoveredFieldId(null);
     };
 
-    const renderTransportDeatails = () => {
+    const renderTransportDetails = () => {
         if (!hoveredFieldId) return null;
-        const hoveredField = fields.find(field => field.id === hoveredFieldId);
-        if (!hoveredField || hoveredField.type !== "TRANSPORT") return null;
-
+        const hoveredField = fields.find(field => field.id === hoveredFieldId) as Transport;
+        if (!hoveredField) return null;
         return (
             <div className={styles["transport-details"]}>
                 <h2>{hoveredField.name}</h2>
@@ -43,7 +42,7 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
     
     const renderPropertyDetails = () => {
         if (!hoveredFieldId) return null;
-        const hoveredField = fields.find(field => field.id === hoveredFieldId);
+        const hoveredField = fields.find(field => field.id === hoveredFieldId) as Property;
         if (!hoveredField || hoveredField.type !== "PROPERTY") return null;
         const propertyCity = cities.find(c => c.id === hoveredField.cityid) || null;
 
@@ -119,7 +118,7 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
 
         const landedField = fields.find(field => field.id === newPositionId);
         if (landedField && landedField.type === "PROPERTY" || (landedField && landedField.type === "TRANSPORT" &&  playingState.ownership[landedField.id] === undefined)) {
-            const propertyPrice = landedField.price;
+            const propertyPrice = (landedField as Property).price;
             if ((currentPlayer.money ?? 0) >= propertyPrice) {
                 setShowBuyPropertyDialog(true);
             } else {
@@ -176,7 +175,8 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
             if (propertiesOwned.length > 0) {
                 const totalValueOfProperties = propertiesOwned.reduce((acc, property) => {
                     if (property.type === "PROPERTY" || property.type === "TRANSPORT") {
-                        return acc + property.price;
+                        const propertyPrice = (property as Property).price;
+                        return acc + propertyPrice;
                     }
                     return acc;
                 }, 0);
@@ -200,7 +200,8 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
     const handleBuyHouse = (fieldId: number) => {
         const field = fields[fieldId - 1];
         if (field.type === "PROPERTY") {
-            const housePrice = cities.find(c => c.id === field.cityid)?.pricehouse;
+            const propertyField = field as Property;
+            const housePrice = cities.find(c => c.id === propertyField.cityid)?.pricehouse;
             if (housePrice) {
                 playingDispatch({
                     type: "BUY_HOUSE",
@@ -228,7 +229,7 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
                         >
                             {field.type === "PROPERTY" && (
                                 <div>
-                                    <div>{field.name}</div>
+                                    {field.type === "PROPERTY" && <div>{(field as Property).name}</div>}
 
                                     {playingState.ownership[field.id] !== undefined && (
                                         <div
@@ -242,20 +243,20 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
                                             </div>
                                         </div>
                                     )}
-                                    <div>{field.price}</div>
+                                    {field.type === "PROPERTY" && <div>{(field as Property).price}</div>}
                                 </div>
                             )}
                             
                             {field.type === "TRANSPORT" && (
-                                <img src={`img/${field.image}`} />
+                                <img src={`img/${(field as Transport).image}`} />
                             )}
                             {field.type === "CHANCE_CARD" && (
                                 <img src="img/changecard.svg"></img>)}
                             {field.type === "PAY" && (
-                                <p>Zaplať {field.classicmoney}</p>
+                                <p>Zaplať {(field as Pay).classicMoney}</p>
                             )}
                             {field.type === "TAX" && (
-                                <p>Daně {field.money}</p>
+                                <p>Daně {(field as Tax).money}</p>
                             )}
                             {field.type === "JAIL" && (
                                 <img src="img/jail.svg"></img>
@@ -263,7 +264,7 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
                             {field.type === "START" && (
                                 <>
                                     <p>Start</p>
-                                    <p>Dostaneš {field.money}</p>
+                                    <p>Dostaneš {(field as Start).money}</p>
                                 </>
                             )}
 
@@ -310,8 +311,8 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
                                     <div key={index}>
                                         {property.type === "PROPERTY" && (
                                             <>
-                                                <p>{property.name} - Sell for {property.price}</p>
-                                                <button onClick={() => handleSellProperty(currentPlayerId, index, property.price)}>Sell</button>
+                                                <p>{(property as Property).name} - Sell for {(property as Property).price}</p>
+                                                <button onClick={() => handleSellProperty(currentPlayerId, index, (property as Property).price)}>Sell</button>
                                             </>
                                         )}
                                     </div>
@@ -334,7 +335,7 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
                     <Dice size={100} onRoll={handleDiceRoll} />
                 </div>
                 {renderPropertyDetails()}
-                {renderTransportDeatails()}
+                {renderTransportDetails()}
             </div>
         </>
     );

@@ -22,16 +22,6 @@ export type PlayingPlayer = {
     isBankrupt: boolean;
 };
 
-
-export type Property = {
-    name: string;
-    cityid: number;
-    type: "PROPERTY";
-    price: number;
-    rent: number;
-    houses: number;
-    id: number;
-}
 export type Player = {
     id: number;
     role: Role;
@@ -41,61 +31,75 @@ export type Player = {
   export type GameState = {
     players: PlayingPlayer[];
     isPlayingPlayerid : number;
-    fields: FieldType[];
+    fields: Field[];
     ownership: { [key: number]: number };
   };
 
-  type Field = {
+  export interface Field {
     id: number;
     type: FieldType;
+  }
+
+  export enum FieldType {
+    PROPERTY = "PROPERTY",
+    CHANCE_CARD = "CHANCE_CARD",
+    PAY = "PAY",
+    TAX = "TAX",
+    JAIL = "JAIL",
+    START = "START",
+    ANTI_MONOPOLY_OFFICE = "ANTI_MONOPOLY_OFFICE",
+    ENERGY = "ENERGY",
+    TRANSPORT = "TRANSPORT",
+  }
+
+  export type ChanceCard = Field & {
+    type: FieldType.CHANCE_CARD;
+};
+
+export type Pay = Field & {
+    type: FieldType.PAY;
+    classicMoney: number;
 }
 
-type ChanceCard = {
-    type: "CHANCE_CARD";
-    id: number
-}
-
-type Pay = {
-    type: "PAY";
-    classicmoney: number;
-    id: number;
-}
-
-type Tax = {
-    type: "TAX";
-    percent: number;
+export type Tax = Field & {
+    type: FieldType.TAX;
+    percentage: number;
     money: number;
-    id: number;
 }
 
-type Jail = {
-    type: "JAIL";
-    id: number;
+export type Jail = Field & {
+    type: FieldType.JAIL;
+};
+
+export type Property = Field & {
+    type: FieldType.PROPERTY;
+    name: string;
+    cityid: number;
+    price: number;
+    rent: number;
+    houses: number;
+
 }
 
-type Start = {
-    type: "START";
+export type Start = Field & {
+    type: FieldType.START;
     money: number;
-    id: number;
 }
 
-type AntiMonopolyOffice = {
-    type: "ANTI_MONOPOLY_OFFICE";
-    id: number;
-}
+export type AntiMonopolyOffice = Field & {
+    type: FieldType.ANTI_MONOPOLY_OFFICE;
+};
 
-type Energy = {
-    type: "Energy";
-    id: number;
-}
+export type Energy = Field & {
+    type: FieldType.ENERGY;
+};
 
-type Transport = {
-    type: "TRANSPORT";
-    id: number;
+export type Transport = Field & {
+    type: FieldType.TRANSPORT;
     name: string;
     price: number;
     rent: number;
     image: string;
 };
 
-export type FieldType = Property | ChanceCard | Pay | Jail | Start | AntiMonopolyOffice | Tax | Energy | Transport;
+//export type Field = Property | ChanceCard | Pay | Jail | Start | AntiMonopolyOffice | Tax | Energy | Transport;

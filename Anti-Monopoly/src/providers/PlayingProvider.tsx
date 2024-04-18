@@ -1,50 +1,50 @@
 import React, { PropsWithChildren, createContext, useReducer } from 'react';
-import { Field, PlayingPlayer, Player, GameState, cities, Role } from '../types/type';
+import { Field, PlayingPlayer, Player, GameState, cities, Role, FieldType, Start, Tax, Jail, Pay, ChanceCard, Property, Transport, AntiMonopolyOffice} from '../types/type';
 
 
 
 // definování pole hráče.
 const initialFields: Field[] = [
-  { type: "START", money: 200, id: 1 },
-  { type: "PROPERTY", cityid: 100, name: "Corso Impero", price: 60, rent: 6, houses: 0, id: 2 },
-  { type: "CHANCE_CARD", id: 3 },
-  { type: "PROPERTY", name: "Via Roma", cityid: 100, price: 60, rent: 60, houses: 0, id: 4 },
-  { type: "TAX", percent: 20, money: 100, id: 5 },
-  { type: "TRANSPORT", name: "Letecká doprava", price: 200, rent: 20, id: 6, image: "Airplane.svg" },
-  { type: "PROPERTY", name: "Alexanderplatz", cityid: 101, price: 100, rent: 20, houses: 0, id: 7 },
-  { type: "CHANCE_CARD", id: 8 },
-  { type: "PROPERTY", cityid: 101, name: "Kurfürstendamm", price: 100, rent: 10, houses: 0, id: 9 },
-  { type: "PROPERTY", cityid: 101, name: "Potsdammer StraSe", price: 120, rent: 12, houses: 0, id: 10 },
-  { type: "JAIL", id: 11 },
-  { type: "PROPERTY", name: "Syntagma", cityid: 107, price: 400, rent: 40, houses: 0, id: 40 },
-  { type: "PROPERTY", name: "Plaza Mayor", cityid: 103, price: 140, rent: 14, houses: 0, id: 12 },
-  { type: "PAY", classicmoney: 75, id: 39 },
-  { type: "PROPERTY", name: "Elektrárna", cityid: 103, price: 100, rent: 20, houses: 0, id: 13 },
-  { type: "PROPERTY", name: "La Plaka", cityid: 107, price: 350, rent: 35, houses: 0, id: 38 },
-  { type: "PROPERTY", name: "Gran Via", cityid: 103, price: 140, rent: 14, houses: 0, id: 14 },
-  { type: "CHANCE_CARD", id: 37 },
-  { type: "PROPERTY", name: "Paseo de la Castellana", cityid: 103, price: 160, rent: 16, houses: 0, id: 15 },
-  { type: "TRANSPORT", name: "Autobusová doprava", price: 200, rent: 20, id: 36, image: "Bus.svg"},
-  { type: "TRANSPORT", name: "Tramvajová doprava", price: 200, rent: 20, id: 16, image: "Tramvaj.svg"},
-  { type: "PROPERTY", name: "Oxford Street", cityid: 104, price: 320, rent: 32, houses: 0, id: 35 },
-  { type: "PROPERTY", name: "Dam", cityid: 105, price: 180, rent: 18, houses: 0, id: 17 },
-  { type: "CHANCE_CARD", id: 34 },
-  { type: "CHANCE_CARD", id: 18 },
-  { type: "PROPERTY", name: "Piccadilly", cityid: 104, price: 300, rent: 30, houses: 0, id: 33 },
-  { type: "PROPERTY", name: "Leidsestraat", cityid: 105, price: 180, rent: 18, houses: 0, id: 19 },
-  { type: "PROPERTY", name: "Park Lane", cityid: 104, price: 300, rent: 30, houses: 0, id: 32 },
-  { type: "PROPERTY", name: "Kalverstraat", cityid: 105, price: 200, rent: 20, houses: 0, id: 20 },
-  { type: "JAIL", id: 31 },
-  { type: "PROPERTY", name: "Nieuwstraat", cityid: 106, price: 280, rent: 28, houses: 0, id: 30 },
-  { type: "PROPERTY", name: "Plynárna", cityid: 107, price: 150, rent: 15, houses: 0, id: 29 },
-  { type: "PROPERTY", name: "Hoogstraat", cityid: 106, price: 260, rent: 26, houses: 0, id: 28 },
-  { type: "PROPERTY", name: "Grote Markt", cityid: 106, price: 260, rent: 26, houses: 0, id: 27 },
-  { type: "TRANSPORT", name: "Železniční doprava",  price: 240, rent: 24, id: 26, image: "Train.svg"},
-  { type: "PROPERTY", name: "ChampsElysees", cityid: 107, price: 240, rent: 24, houses: 0, id: 25 },
-  { type: "PROPERTY", name: "Rue de la Paix", cityid: 107, price: 220, rent: 22, houses: 0, id: 24 },
-  { type: "CHANCE_CARD", id: 23 },
-  { type: "PROPERTY", name: "Rue de la Fayette", cityid: 107, price: 220, rent: 22, houses: 0, id: 22 },
-  { type: "ANTI_MONOPOLY_OFFICE", id: 21 },
+  { type: FieldType.START, money: 200, id: 1 } as Start,
+  { type: FieldType.PROPERTY, cityid: 100, name: "Corso Impero", price: 60, rent: 6, houses: 0, id: 2 } as Property,
+  { type: FieldType.CHANCE_CARD, id: 3 } as ChanceCard,
+  { type: FieldType.PROPERTY, name: "Via Roma", cityid: 100, price: 60, rent: 60, houses: 0, id: 4 } as Property,
+  { type: FieldType.TAX, percentage: 20, money: 100, id: 5 } as Tax,
+  { type: FieldType.TRANSPORT, name: "Letecká doprava", price: 200, rent: 20, id: 6, image: "Airplane.svg" } as Transport,
+  { type: FieldType.PROPERTY, name: "Alexanderplatz", cityid: 101, price: 100, rent: 20, houses: 0, id: 7 } as Property,
+  { type: FieldType.CHANCE_CARD, id: 8 } as ChanceCard,
+  { type: FieldType.PROPERTY, cityid: 101, name: "Kurfürstendamm", price: 100, rent: 10, houses: 0, id: 9 } as Property,
+  { type: FieldType.PROPERTY, cityid: 101, name: "Potsdammer StraSe", price: 120, rent: 12, houses: 0, id: 10 } as Property,
+  { type: FieldType.JAIL, id: 11 } as Jail,
+  { type: FieldType.PROPERTY, name: "Syntagma", cityid: 107, price: 400, rent: 40, houses: 0, id: 40 } as Property,
+  { type: FieldType.PROPERTY, name: "Plaza Mayor", cityid: 103, price: 140, rent: 14, houses: 0, id: 12 } as Property,
+  { type: FieldType.PAY, classicMoney: 75, id: 39 } as Pay,
+  { type: FieldType.PROPERTY, name: "Elektrárna", cityid: 103, price: 100, rent: 20, houses: 0, id: 13 } as Property,
+  { type: FieldType.PROPERTY, name: "La Plaka", cityid: 107, price: 350, rent: 35, houses: 0, id: 38 } as Property,
+  { type: FieldType.PROPERTY, name: "Gran Via", cityid: 103, price: 140, rent: 14, houses: 0, id: 14 } as Property,
+  { type: FieldType.CHANCE_CARD, id: 37 } as ChanceCard,
+  { type: FieldType.PROPERTY, name: "Paseo de la Castellana", cityid: 103, price: 160, rent: 16, houses: 0, id: 15 } as Property,
+  { type: FieldType.TRANSPORT, name: "Autobusová doprava", price: 200, rent: 20, id: 36, image: "Bus.svg"} as Transport,
+  { type: FieldType.TRANSPORT, name: "Tramvajová doprava", price: 200, rent: 20, id: 16, image: "Tramvaj.svg"} as Transport,
+  { type: FieldType.PROPERTY, name: "Oxford Street", cityid: 104, price: 320, rent: 32, houses: 0, id: 35 } as Property,
+  { type: FieldType.PROPERTY, name: "Dam", cityid: 105, price: 180, rent: 18, houses: 0, id: 17 } as Property,
+  { type: FieldType.CHANCE_CARD, id: 34 } as ChanceCard,
+  { type: FieldType.CHANCE_CARD, id: 18 } as ChanceCard,
+  { type: FieldType.PROPERTY, name: "Piccadilly", cityid: 104, price: 300, rent: 30, houses: 0, id: 33 } as Property,
+  { type: FieldType.PROPERTY, name: "Leidsestraat", cityid: 105, price: 180, rent: 18, houses: 0, id: 19 } as Property,
+  { type: FieldType.PROPERTY, name: "Park Lane", cityid: 104, price: 300, rent: 30, houses: 0, id: 32 } as Property,
+  { type: FieldType.PROPERTY, name: "Kalverstraat", cityid: 105, price: 200, rent: 20, houses: 0, id: 20 } as Property,
+  { type: FieldType.JAIL, id: 31 } as Jail,
+  { type: FieldType.PROPERTY, name: "Nieuwstraat", cityid: 106, price: 280, rent: 28, houses: 0, id: 30 } as Property,
+  { type: FieldType.PROPERTY, name: "Plynárna", cityid: 107, price: 150, rent: 15, houses: 0, id: 29 } as Property,
+  { type: FieldType.PROPERTY, name: "Hoogstraat", cityid: 106, price: 260, rent: 26, houses: 0, id: 28 } as Property,
+  { type: FieldType.PROPERTY, name: "Grote Markt", cityid: 106, price: 260, rent: 26, houses: 0, id: 27 } as Property,
+  { type: FieldType.TRANSPORT, name: "Železniční doprava",  price: 240, rent: 24, id: 26, image: "Train.svg"} as Transport,
+  { type: FieldType.PROPERTY, name: "ChampsElysees", cityid: 107, price: 240, rent: 24, houses: 0, id: 25 } as Property,
+  { type: FieldType.PROPERTY, name: "Rue de la Paix", cityid: 107, price: 220, rent: 22, houses: 0, id: 24 } as Property,
+  { type: FieldType.CHANCE_CARD, id: 23 } as ChanceCard,
+  { type: FieldType.PROPERTY, name: "Rue de la Fayette", cityid: 107, price: 220, rent: 22, houses: 0, id: 22 } as Property,
+  { type: FieldType.ANTI_MONOPOLY_OFFICE, id: 21 } as AntiMonopolyOffice,
 ];
 
 type Action =
@@ -110,11 +110,13 @@ const playingReducer = (state: GameState, action: Action): GameState => {
         if (field) {
           switch (field.type) {
             case "PAY":
-              updatedPlayers = updatedPlayers.map(p =>
-                p.id === action.playerId
-                  ? { ...p, money: p.money - field.classicmoney }
-                  : p
-              );
+    
+                const payField = field as Pay;
+                updatedPlayers = updatedPlayers.map(p =>
+                  p.id === action.playerId
+                    ? { ...p, money: p.money - payField.classicMoney }
+                    : p
+                );
               break;
               case "TRANSPORT": {
                 const transportOwner = state.ownership[newPositionId];
@@ -149,7 +151,7 @@ const playingReducer = (state: GameState, action: Action): GameState => {
                     .filter(key => state.ownership[parseInt(key)] === propertyOwner)
                     .map(key => state.fields[parseInt(key) - 1])
                     .filter(field => field.type === "PROPERTY");
-              
+            
                   const isMonopoly = propertiesOwnedByOwner
                     .filter(property => property.cityid === field.cityid).length > 1;
               
@@ -248,7 +250,7 @@ const playingReducer = (state: GameState, action: Action): GameState => {
       const fieldIndex = state.fields.findIndex(field => field.id === action.fieldId);
       const playerIndex = state.players.findIndex(player => player.id === action.playerId);
       if (fieldIndex !== -1 && playerIndex !== -1) {
-        const field = state.fields[fieldIndex];
+        const field = state.fields[fieldIndex] as Property;
         const player = state.players[playerIndex];
         const housePrice = field.type === "PROPERTY" ? cities.find(city => city.id === field.cityid)?.pricehouse : undefined;
     
@@ -292,9 +294,9 @@ const playingReducer = (state: GameState, action: Action): GameState => {
       const fieldIndex = state.fields.findIndex(field => field.id === action.fieldId);
       const playerIndex = state.players.findIndex(player => player.id === action.playerId);
       if (fieldIndex !== -1 && playerIndex !== -1) {
-      const field = state.fields[fieldIndex];
+      const field = state.fields[fieldIndex] as Property;
       const player = state.players[playerIndex];
-      const housePrice = field.type === "PROPERTY" ? cities.find(city => city.id === field.cityid)?.pricehouse : undefined;
+      const housePrice = field.type === "PROPERTY" ? cities.find(city => city.id === field.id)?.pricehouse : undefined;
       const totalCost = (housePrice || 0) * action.houseCount;
 
       if (field.type === "PROPERTY" && field.houses >= action.houseCount) {
