@@ -1,9 +1,6 @@
 .current-player{
     display: flex;
-    flex-direction: column;
     text-align: center;
-    width: 100%;
-    margin-top: 2em;
 }
 
 .imground{
@@ -12,11 +9,19 @@
 
 .current-player--stats{
     max-width: 200px;
-    margin: 0 auto;
+}
+
+.player--stats{
+    max-width: 150px;
 }
 
 .other-players{
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     text-align: center;
+}
+
+.Windows-stats{
+    position: absolute;
+    display: flex;
 }

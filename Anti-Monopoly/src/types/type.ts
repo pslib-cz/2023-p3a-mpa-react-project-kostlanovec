@@ -20,6 +20,7 @@ export type PlayingPlayer = {
     role: Role;
     position: number;
     isBankrupt: boolean;
+    isJailed: boolean;
 };
 
 export type Player = {
@@ -92,6 +93,7 @@ export type AntiMonopolyOffice = Field & {
 
 export type Energy = Field & {
     type: FieldType.ENERGY;
+    name: string;
 };
 
 export type Transport = Field & {

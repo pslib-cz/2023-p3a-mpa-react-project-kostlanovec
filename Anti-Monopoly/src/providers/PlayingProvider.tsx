@@ -1,7 +1,5 @@
 import React, { PropsWithChildren, createContext, useReducer } from 'react';
-import { Field, PlayingPlayer, Player, GameState, cities, Role, FieldType, Start, Tax, Jail, Pay, ChanceCard, Property, Transport, AntiMonopolyOffice} from '../types/type';
-
-
+import { Field, PlayingPlayer, Player, GameState, cities, Role, FieldType, Start, Tax, Jail, Pay, ChanceCard, Property, Transport, AntiMonopolyOffice, Energy} from '../types/type';
 
 // definování pole hráče.
 const initialFields: Field[] = [
@@ -19,7 +17,7 @@ const initialFields: Field[] = [
   { type: FieldType.PROPERTY, name: "Syntagma", cityid: 107, price: 400, rent: 40, houses: 0, id: 40 } as Property,
   { type: FieldType.PROPERTY, name: "Plaza Mayor", cityid: 103, price: 140, rent: 14, houses: 0, id: 12 } as Property,
   { type: FieldType.PAY, classicMoney: 75, id: 39 } as Pay,
-  { type: FieldType.PROPERTY, name: "Elektrárna", cityid: 103, price: 100, rent: 20, houses: 0, id: 13 } as Property,
+  { type: FieldType.ENERGY, name: "Elektrárna", id: 13 } as Energy,
   { type: FieldType.PROPERTY, name: "La Plaka", cityid: 107, price: 350, rent: 35, houses: 0, id: 38 } as Property,
   { type: FieldType.PROPERTY, name: "Gran Via", cityid: 103, price: 140, rent: 14, houses: 0, id: 14 } as Property,
   { type: FieldType.CHANCE_CARD, id: 37 } as ChanceCard,
@@ -36,7 +34,7 @@ const initialFields: Field[] = [
   { type: FieldType.PROPERTY, name: "Kalverstraat", cityid: 105, price: 200, rent: 20, houses: 0, id: 20 } as Property,
   { type: FieldType.JAIL, id: 31 } as Jail,
   { type: FieldType.PROPERTY, name: "Nieuwstraat", cityid: 106, price: 280, rent: 28, houses: 0, id: 30 } as Property,
-  { type: FieldType.PROPERTY, name: "Plynárna", cityid: 107, price: 150, rent: 15, houses: 0, id: 29 } as Property,
+  { type: FieldType.ENERGY, name: "Plynárna", id: 29 } as Energy,
   { type: FieldType.PROPERTY, name: "Hoogstraat", cityid: 106, price: 260, rent: 26, houses: 0, id: 28 } as Property,
   { type: FieldType.PROPERTY, name: "Grote Markt", cityid: 106, price: 260, rent: 26, houses: 0, id: 27 } as Property,
   { type: FieldType.TRANSPORT, name: "Železniční doprava",  price: 240, rent: 24, id: 26, image: "Train.svg"} as Transport,
@@ -64,8 +62,8 @@ type Action =
 
 const initialState: GameState = {
   players: [
-    { id: 1, money: 1500, role: Role.MONOPOLIST, position: 1, isBankrupt: false },
-    { id: 2, money: 1500, role: Role.CONCURENT, position: 1, isBankrupt: false },
+    { id: 1, money: 2000, role: Role.MONOPOLIST, position: 1, isBankrupt: false, isJailed: false },
+    { id: 2, money: 2000, role: Role.CONCURENT, position: 1, isBankrupt: false, isJailed: false },
   ],
   isPlayingPlayerid: 1,
   fields: initialFields,
@@ -80,104 +78,136 @@ const playingReducer = (state: GameState, action: Action): GameState => {
         money: action.defaultMoney,
         position: action.defaultPosition,
         isBankrupt: false,
+        isJailed: false,
       }));
 
       return {
         ...state,
         players: playersInit,
       };
-
+      
     case "MOVE_PLAYER": {
       const playerMoving = state.players.find(p => p.id === action.playerId);
       if (playerMoving) {
-        const newPositionId = action.newPositionId;
+      const newPositionId = action.newPositionId;
 
-        let updatedPlayers = state.players.map(p =>
-          p.id === action.playerId
-            ? { ...p, position: newPositionId }
-            : p
+      let updatedPlayers = state.players.map(p =>
+        p.id === action.playerId
+        ? { ...p, position: newPositionId }
+        : p
+      );
+
+      if (newPositionId < playerMoving.position || newPositionId === 1) {
+        updatedPlayers = updatedPlayers.map(p =>
+        p.id === action.playerId
+          ? { ...p, money: p.money + 200 }
+          : p
         );
+      }
 
-        if (newPositionId < playerMoving.position || newPositionId === 1) {
+      const field = state.fields.find(f => f.id === newPositionId);
+      if (field) {
+        switch (field.type) {
+        case "PAY":
+          const payField = field as Pay;
           updatedPlayers = updatedPlayers.map(p =>
-            p.id === action.playerId
-              ? { ...p, money: p.money + 200 }
-              : p
+          p.id === action.playerId
+            ? { ...p, money: p.money - payField.classicMoney }
+            : p
           );
-        }
+          break;
 
-        const field = state.fields.find(f => f.id === newPositionId);
-        if (field) {
-          switch (field.type) {
-            case "PAY":
-    
-                const payField = field as Pay;
-                updatedPlayers = updatedPlayers.map(p =>
-                  p.id === action.playerId
-                    ? { ...p, money: p.money - payField.classicMoney }
-                    : p
-                );
-              break;
-              case "TRANSPORT": {
-                const transportOwner = state.ownership[newPositionId];
-                if (transportOwner && transportOwner !== action.playerId) {
-                  const transportPropertiesOwned = Object.keys(state.ownership).filter(
-                    key => state.ownership[parseInt(key)] === transportOwner && state.fields[parseInt(key) - 1].type === "TRANSPORT"
-                  ).length;
-              
-                  let rentAmount = 20;
-              
-                  if (transportPropertiesOwned > 1) {
-                    rentAmount = 40 * Math.pow(2, transportPropertiesOwned - 1);
-                  }
-                  rentAmount = Math.min(rentAmount, 320);
-                  updatedPlayers = updatedPlayers.map(p => {
-                    if (p.id === action.playerId) {
-                      return { ...p, money: p.money - rentAmount };
-                    } else if (p.id === transportOwner) {
-                      return { ...p, money: p.money + rentAmount };
-                    }
-                    return p;
-                  });
-                }
-              }
-              break;
-              
-              case "PROPERTY": {
-                const propertyOwner = state.ownership[newPositionId];
-                if (propertyOwner && propertyOwner !== action.playerId && field.type === "PROPERTY") {
+        case "TRANSPORT": {
+          console.log("TRANSPORT");
+          const transportOwner = state.ownership[newPositionId];
+          if (transportOwner && transportOwner !== action.playerId) {
+          const transportPropertiesOwned = Object.keys(state.ownership).filter(
+            key => state.ownership[parseInt(key)] === transportOwner && state.fields[parseInt(key) - 1].type === "TRANSPORT"
+          ).length;
 
-                  const propertiesOwnedByOwner = Object.keys(state.ownership)
-                    .filter(key => state.ownership[parseInt(key)] === propertyOwner)
-                    .map(key => state.fields[parseInt(key) - 1])
-                    .filter(field => field.type === "PROPERTY");
-            
-                  const isMonopoly = propertiesOwnedByOwner
-                    .filter(property => property.cityid === field.cityid).length > 1;
-              
-                  let rentAmount = field.rent;
-                  if (isMonopoly) {
-                    rentAmount *= 2;
-                  }
-              
-                  updatedPlayers = updatedPlayers.map(p => {
-                    if (p.id === action.playerId) {
-                      return { ...p, money: p.money - rentAmount };
-                    } else if (p.id === propertyOwner) {
-                      return { ...p, money: p.money + rentAmount };
-                    }
-                    return p;
-                  });
-                }
-              }
-              break;
+          let rentAmount = 20;
+
+          if (transportPropertiesOwned > 1) {
+            rentAmount = 40 * Math.pow(2, transportPropertiesOwned - 1);
           }
+          rentAmount = Math.min(rentAmount, 320);
+          updatedPlayers = updatedPlayers.map(p => {
+            if (p.id === action.playerId) {
+            return { ...p, money: p.money - rentAmount };
+            } else if (p.id === transportOwner) {
+            return { ...p, money: p.money + rentAmount };
+            }
+            return p;
+          });
+          }
+          break;
         }
 
-        return {
-          ...state,
-          players: updatedPlayers,
-        };
+        case "PROPERTY": {
+          const propertyOwner = state.ownership[newPositionId];
+          if (propertyOwner && propertyOwner !== action.playerId && field.type === "PROPERTY") {
+
+          const propertiesOwnedByOwner = Object.keys(state.ownership)
+            .filter(key => state.ownership[parseInt(key)] === propertyOwner)
+            .map(key => state.fields[parseInt(key) - 1])
+            .filter(field => field.type === "PROPERTY");
+
+          const isMonopoly = propertiesOwnedByOwner
+            .filter(property => property.cityid === field.cityid).length > 1;
+
+          let rentAmount = field.rent;
+          if (isMonopoly) {
+            rentAmount *= 2;
+          }
+
+          updatedPlayers = updatedPlayers.map(p => {
+            if (p.id === action.playerId) {
+            return { ...p, money: p.money - rentAmount };
+            } else if (p.id === propertyOwner) {
+            return { ...p, money: p.money + rentAmount };
+            }
+            return p;
+          });
+          }
+          break;
+        }
+
+        case "ANTI_MONOPOLY_OFFICE": {
+          const player = state.players.find(p => p.id === action.playerId);
+          if (player) {
+          if (player.role === Role.MONOPOLIST) {
+            updatedPlayers = updatedPlayers.map(p =>
+            p.id === action.playerId
+              ? { ...p, money: p.money - 100 }
+              : p
+            );
+          } else if (player.role === Role.CONCURENT) {
+            const diceRoll = Math.floor(Math.random() * 6) + 1;
+            const moneyToAdd = diceRoll === 6 ? 50 : 25;
+            updatedPlayers = updatedPlayers.map(p =>
+            p.id === action.playerId
+              ? { ...p, money: p.money + moneyToAdd }
+              : p
+            );
+          }
+          }
+          break;
+        }
+
+      case "JAIL": {
+        if (playerMoving.role === Role.MONOPOLIST) {
+        updatedPlayers = updatedPlayers.map(p =>
+          p.id === action.playerId
+          ? { ...p, money: p.money - 100 }
+          : p
+        );
+      }
+    }}}
+
+      return {
+        ...state,
+        players: updatedPlayers,
+      };
       }
       return state;
     }
@@ -319,9 +349,10 @@ const playingReducer = (state: GameState, action: Action): GameState => {
         const newPlayer: PlayingPlayer = {
           id: state.players.length + 1,
           role: Role.CONCURENT,
-          money: 1500,
+          money: 2000,
           position: 0,
-          isBankrupt: false
+          isBankrupt: false,
+          isJailed: false,
         };
         return { ...state, players: [...state.players, newPlayer] };
       }
@@ -343,7 +374,6 @@ const playingReducer = (state: GameState, action: Action): GameState => {
             : player
         ),
       };
-
 
     case 'DECLARE_BANKRUPTCY':
       const updatedOwnership = { ...state.ownership };

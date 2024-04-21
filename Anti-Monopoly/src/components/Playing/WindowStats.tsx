@@ -24,7 +24,7 @@ const WindowsStats = ({ currentPlayerId }: { currentPlayerId: number }) => {
     });
 
     return (
-        <div>
+        <div className="Windows-stats">
             <div className={styles["current-player"]}>
                 {currentPlayer && (
                     <div className={styles["current-player--stats"]} >
@@ -36,14 +36,10 @@ const WindowsStats = ({ currentPlayerId }: { currentPlayerId: number }) => {
                         <p>{currentPlayer.position}</p>
                     </div>
                 )}
-            </div>
-            <div className={styles["other-players"]}>
                 {sortedPlayers.filter(player => player.id !== currentPlayerId).map(player => (
                     <div key={player.id} className={styles["player--stats"]}>
                         <img className={styles["imground"]} src={getImageForRole(player.role)} alt={player.role} />
                         <h2>Hráč {player.id}</h2>
-                        <p>Finance</p>
-                        <p>{player.money}</p>
                     </div>
                 ))}
             </div>

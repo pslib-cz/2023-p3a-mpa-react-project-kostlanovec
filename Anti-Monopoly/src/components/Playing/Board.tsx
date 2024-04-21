@@ -3,7 +3,7 @@ import styles from './Board.module.css';
 import Dice from "react-dice-roll";
 import { PlayingContext } from "../../providers/PlayingProvider";
 import { Property, Start, Transport, cities, Tax, Pay } from "../../types/type";
-
+import WindowsStats from "./WindowStats";
 const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: number, setCurrentPlayerId: (id: number) => void }) => {
     const [playingState, playingDispatch] = useContext(PlayingContext);
     const [showBuyPropertyDialog, setShowBuyPropertyDialog] = useState<boolean>(false);
@@ -20,79 +20,100 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
     const handleMouseLeave = () => {
         setHoveredFieldId(null);
     };
-
-    const renderTransportDetails = () => {
-        if (!hoveredFieldId) return null;
-        const hoveredField = fields.find(field => field.id === hoveredFieldId) as Transport;
-        if (!hoveredField) return null;
-        return (
-            <div className={styles["transport-details"]}>
-                <h2>{hoveredField.name}</h2>
-                <h3>Poplatek</h3>
-                <p>{hoveredField.price}</p>
-                <h3>Poplatek s 2 stanicemi</h3>
-                <p>{hoveredField.price * 2}</p>
-                <h3>Poplatek s 3 stanicemi</h3>
-                <p>{hoveredField.price * 4}</p>
-                <h3>Poplatek se 4 stanicemi</h3>
-                <p>{hoveredField.price * 8}</p>
-            </div>
-        );
-    }
     
-    const renderPropertyDetails = () => {
-        if (!hoveredFieldId) return null;
-        const hoveredField = fields.find(field => field.id === hoveredFieldId) as Property;
-        if (!hoveredField || hoveredField.type !== "PROPERTY") return null;
-        const propertyCity = cities.find(c => c.id === hoveredField.cityid) || null;
+    const renderDetails = () => {
+        const hoveredField = fields.find((field) => field.id === hoveredFieldId);
+        console.log(hoveredField?.type)
+        console.log(hoveredField);
+        if (!hoveredField) return null;
 
-        return (
-            <div className={styles["property-details"]}>
-                <div className={styles[(propertyCity?.color ?? '')]}>
-                    <h2>{propertyCity?.name}</h2>
-                    <h2>{hoveredField.name}</h2>
+        if (hoveredField.type === "PROPERTY") {
+            const propertyCity = cities.find(c => c.id === (hoveredField as Property).cityid);
+            const nevim123 = hoveredField as Property;
+
+            return (
+                <div className={styles["property-details"]}>
+                    <div className={styles[(propertyCity?.color ?? '')]}>
+                        <h2>{propertyCity?.name}</h2>
+                        <h2>{nevim123.name}</h2>
+                    </div>
+                    <div className={styles["grid-info"]}>
+                        <h3>Konkurent</h3>
+                        <p></p>
+                        <h3>Monopolista</h3>
+                        <p>{nevim123.price}</p>
+                        <p>cena pozemku</p>
+                        <p>{nevim123.price}</p>
+                        <p>{propertyCity?.pricehouse}</p>
+                        <p>cena domu</p>
+                        <p>{propertyCity?.pricehouse}</p>
+                        <div></div>
+                        <h2>Nájemné</h2>
+                        <div></div>
+                        <div>{nevim123.price / 10}</div>
+                        <p>za pozemek</p>
+                        <div>{nevim123.price / 10}</div>
+                        <div></div>
+                        <div>{nevim123.price / 5} pokud hráč vlastní 2 ulice</div>
+                        <div></div>
+                        <p>{nevim123.price / 10 + (propertyCity?.pricehouse  ?? 0) / 10} </p>
+                        <p>s 1 domem</p>
+                        <p>{nevim123.price / 5 + (propertyCity?.pricehouse  ?? 0) / 5}</p>
+                        <p>{nevim123.price / 10 + (propertyCity?.pricehouse ?? 0) / 5}</p>
+                        <p>se 2 domy</p>
+                        <p>{nevim123.price / 5 + (propertyCity?.pricehouse  ?? 0) / 2.5}</p>
+                        <p>{nevim123.price / 10 + ((propertyCity?.pricehouse ?? 0) / 5) + ((propertyCity?.pricehouse ?? 0) / 10)}</p>
+                        <p>se 3 domy</p>
+                        <p>{nevim123.price / 5 + ((propertyCity?.pricehouse  ?? 0) / 2.5 ) +  ((propertyCity?.pricehouse ?? 0) / 5)}</p>
+                        <p>{nevim123.price / 10 + ((propertyCity?.pricehouse ?? 0) / 5) + ((propertyCity?.pricehouse ?? 0) / 5)}</p>
+                        <p>se 4 domy</p>
+                        <p>{nevim123.price / 5 + ((propertyCity?.pricehouse  ?? 0) / 2.5 ) +  ((propertyCity?.pricehouse ?? 0) / 2.5)}</p>
+                        <div></div>
+                        <div></div>
+                        <p>s 1 hotelem</p>
+                        <p>{nevim123.price / 10 + ((propertyCity?.pricehouse ?? 0) / 5) + ( 3 * (propertyCity?.pricehouse ?? 0) / 10)}</p>
+                        <p>s 5 domy</p>
+                        <div></div>
+                        <p>s 1 hotelem</p>
+                    </div>
                 </div>
-                <div className={styles["grid-info"]}>
-                    <h3>Konkurent</h3>
-                    <p></p>
-                    <h3>Monopolista</h3>
-                    <p>{hoveredField.price}</p>
-                    <p>cena pozemku</p>
-                    <p>{hoveredField.price}</p>
-                    <p>{propertyCity?.pricehouse}</p>
-                    <p>cena domu</p>
-                    <p>{propertyCity?.pricehouse}</p>
-                    <div></div>
-                    <h2>Nájemné</h2>
-                    <div></div>
-                    <div>{hoveredField.price / 10}</div>
-                    <p>za pozemek</p>
-                    <div>{hoveredField.price / 10}</div>
-                    <div></div>
-                    <div>{hoveredField.price / 5} pokud hráč vlastní 2 ulice</div>
-                    <div></div>
-                    <p>{hoveredField.price / 10 + (propertyCity?.pricehouse  ?? 0) / 10} </p>
-                    <p>s 1 domem</p>
-                    <p>{hoveredField.price / 5 + (propertyCity?.pricehouse  ?? 0) / 5}</p>
-                    <p>{hoveredField.price / 10 + (propertyCity?.pricehouse ?? 0) / 5}</p>
-                    <p>se 2 domy</p>
-                    <p>{hoveredField.price / 5 + (propertyCity?.pricehouse  ?? 0) / 2.5}</p>
-                    <p>{hoveredField.price / 10 + ((propertyCity?.pricehouse ?? 0) / 5) + ((propertyCity?.pricehouse ?? 0) / 10)}</p>
-                    <p>se 3 domy</p>
-                    <p>{hoveredField.price / 5 + ((propertyCity?.pricehouse  ?? 0) / 2.5 ) +  ((propertyCity?.pricehouse ?? 0) / 5)}</p>
-                    <p>{hoveredField.price / 10 + ((propertyCity?.pricehouse ?? 0) / 5) + ((propertyCity?.pricehouse ?? 0) / 5)}</p>
-                    <p>se 4 domy</p>
-                    <p>{hoveredField.price / 5 + ((propertyCity?.pricehouse  ?? 0) / 2.5 ) +  ((propertyCity?.pricehouse ?? 0) / 2.5)}</p>
-                    <div></div>
-                    <div></div>
-                    <p>s 1 hotelem</p>
-                    <p>{hoveredField.price / 10 + ((propertyCity?.pricehouse ?? 0) / 5) + ( 3 * (propertyCity?.pricehouse ?? 0) / 10)}</p>
-                    <p>s 5 domy</p>
-                    <div></div>
-                    <p>s 1 hotelem</p>
+            );
+
+        } else if (hoveredField.type === "TRANSPORT") {
+            const transport = fields.find(field => field.id === hoveredField.id) as Transport;
+            return (
+                <div className={styles["property-details"]}>
+                    <div className={styles["transport-details"]}>
+                        <h2>{transport.name}</h2>
+                    </div>
+                    <div className={styles["grid-info"]}>
+                        <h3>Konkurent</h3>
+                        <p></p>
+                        <h3>Monopolista</h3>
+                        <p>{transport.price}</p>
+                        <p>kupní cena</p>
+                        <p>{transport.price}</p>
+                        <div></div>
+                        <h2>Poplatky</h2>
+                        <div></div>
+                        <div>{transport.price / 10}</div>
+                        <p>hráč má 1 společnost</p>
+                        <div>{transport.price / 5}</div>
+                        <div>{transport.price / 10}</div>
+                        <p>hráč má 2 společnosti</p>
+                        <p>{transport.price / 2.5}</p>
+                        <p>{transport.price / 10}</p>
+                        <p>hráč má 3 společnosti</p>
+                        <p>{transport.price / 1.25}</p>
+                        <p>{transport.price / 10}</p>
+                        <p>hráč má 4 společnosti</p>
+                        <p>{transport.price / 0.625}</p>
+                    </div>
                 </div>
-            </div>
-        );
+            );
+        }
+
+        return null;
     };
 
     const { fields } = playingState;
@@ -141,7 +162,7 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
 
             const newPositionId = playingState.players.find(player => player.id === currentPlayerId)?.position || 0;
             const propertyField = fields.find(field => field.id === newPositionId) as Property;
-            if (propertyField && propertyField.type === "PROPERTY" && playingState.ownership[newPositionId] === undefined) {
+            if (propertyField && (propertyField.type === "PROPERTY" || propertyField.type === "TRANSPORT") && playingState.ownership[newPositionId] === undefined) {
                 const propertyPrice = propertyField.price;
                 playingDispatch({
                     type: "BUY_PROPERTY",
@@ -224,7 +245,7 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
                             className={`${styles["field"]}`}
                             key={field.id}
                             id={String(field.id)}
-                            onMouseEnter={() => field.type === "PROPERTY" && handleMouseEnter(field.id)}
+                            onMouseEnter={() => (field.type === "PROPERTY" || field.type === "TRANSPORT") && handleMouseEnter(field.id)}
                             onMouseLeave={handleMouseLeave}
                         >
                             {field.type === "PROPERTY" && (
@@ -246,7 +267,23 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
                                     {field.type === "PROPERTY" && <div>{(field as Property).price}</div>}
                                 </div>
                             )}
-                            
+
+                            {field.type === "TRANSPORT" && (
+                                <div>
+                                    {playingState.ownership[field.id] !== undefined && (
+                                        <div
+                                            className={styles["property-owner"]}
+                                            style={{ backgroundColor: "red" }}
+                                        >
+                                            <div>
+                                                {playingState.players.find(player => player.id === playingState.ownership[field.id])?.id
+                                                    ? `HRÁČ ${playingState.players.find(player => player.id === playingState.ownership[field.id])?.id}`
+                                                    : ''}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
                             {field.type === "TRANSPORT" && (
                                 <img src={`img/${(field as Transport).image}`} />
                             )}
@@ -286,6 +323,7 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
                     ))}
 
                     <div className={styles["blank_field"]}>
+                        <WindowsStats currentPlayerId={currentPlayerId} />
                         {/* obrázky na pro prázdné políčko na hrací desce/*}            
                         {/* <img src="img/city.png" alt="Obrázek vlevo" className={styles["img-left"]} />
                         <img src="img/city.png" alt="Obrázek vpravo" className={styles["img-right"]} />
@@ -334,8 +372,7 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
                 <div className={styles["dices"]}>
                     <Dice size={100} onRoll={handleDiceRoll} />
                 </div>
-                {renderPropertyDetails()}
-                {renderTransportDetails()}
+                {renderDetails()}
             </div>
         </>
     );
