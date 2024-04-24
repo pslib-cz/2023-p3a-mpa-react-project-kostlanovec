@@ -7,7 +7,7 @@ const Rules = () => {
         <>
             <div className={styles["ScrollWindow"]}>
                 <Link to="/" className={styles["Exit"]}><img src="img/cross-line.svg"></img></Link>
-                <h1>Pravidla</h1>
+                <h1 className={styles["h1-rules"]}>Pravidla</h1>
                 <ol>
                     <li>deset</li>
                 </ol>

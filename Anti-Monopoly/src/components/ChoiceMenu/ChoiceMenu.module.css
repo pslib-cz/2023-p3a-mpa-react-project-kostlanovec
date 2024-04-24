@@ -6,13 +6,14 @@
 }
 
 .choice--menu{
-    width: 90%;
-    height: 90%;
+    width: 44rem;
+    height: 34rem;
     margin: 0 auto;
+    margin-top: 0px;
     border-radius: 2em;
     border: 1px solid black;
     background-color: var(--white);
-    margin-top: 5%;
+    margin-top: 3rem;
     position: relative;
     user-select: none;
 }

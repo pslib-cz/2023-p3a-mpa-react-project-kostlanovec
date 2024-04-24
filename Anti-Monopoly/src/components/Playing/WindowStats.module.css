@@ -24,4 +24,6 @@
 .Windows-stats{
     position: absolute;
     display: flex;
+    margin: 1em;
+    gap: 1em;
 }

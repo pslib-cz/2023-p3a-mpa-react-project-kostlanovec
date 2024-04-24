@@ -34,6 +34,7 @@ export type Player = {
     isPlayingPlayerid : number;
     fields: Field[];
     ownership: { [key: number]: number };
+    chanceCardMessage?: string;
   };
 
   export interface Field {
@@ -51,6 +52,7 @@ export type Player = {
     ANTI_MONOPOLY_OFFICE = "ANTI_MONOPOLY_OFFICE",
     ENERGY = "ENERGY",
     TRANSPORT = "TRANSPORT",
+    GO_JAIL = "GO_JAIL"
   }
 
   export type ChanceCard = Field & {
@@ -70,6 +72,10 @@ export type Tax = Field & {
 
 export type Jail = Field & {
     type: FieldType.JAIL;
+};
+
+export type GoJail = Field & {
+    type: FieldType.GO_JAIL;
 };
 
 export type Property = Field & {
@@ -103,5 +109,3 @@ export type Transport = Field & {
     rent: number;
     image: string;
 };
-
-//export type Field = Property | ChanceCard | Pay | Jail | Start | AntiMonopolyOffice | Tax | Energy | Transport;

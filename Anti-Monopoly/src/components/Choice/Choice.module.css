@@ -15,10 +15,10 @@
     position: absolute;
     right: 0;
     top: 0;
-    padding: 1em;
+    padding: 0.5em;
     background: linear-gradient(135deg, #FF0000 0%, #990000 100%);
     border-radius: 360px;
     cursor: pointer;
-    width: 40px;
-    height: 40px;
+    width: 20px;
+    height: 20px;
 }

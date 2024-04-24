@@ -147,24 +147,22 @@ const playingReducer = (state: GameState, action: Action): GameState => {
           const propertyOwner = state.ownership[newPositionId];
           if (propertyOwner && propertyOwner !== action.playerId && field.type === "PROPERTY") {
 
-          const propertiesOwnedByOwner = Object.keys(state.ownership)
+          /*const propertiesOwnedByOwner = Object.keys(state.ownership)
             .filter(key => state.ownership[parseInt(key)] === propertyOwner)
             .map(key => state.fields[parseInt(key) - 1])
-            .filter(field => field.type === "PROPERTY");
+            .filter(field => field.type === "PROPERTY");*/
 
-          const isMonopoly = propertiesOwnedByOwner
+          /*const isMonopoly = propertiesOwnedByOwner
             .filter(property => property.cityid === field.cityid).length > 1;
 
           let rentAmount = field.rent;
           if (isMonopoly) {
             rentAmount *= 2;
-          }
+          }*/
 
           updatedPlayers = updatedPlayers.map(p => {
             if (p.id === action.playerId) {
-            return { ...p, money: p.money - rentAmount };
-            } else if (p.id === propertyOwner) {
-            return { ...p, money: p.money + rentAmount };
+            return { ...p, money: p.money - 200 };
             }
             return p;
           });
@@ -260,20 +258,24 @@ const playingReducer = (state: GameState, action: Action): GameState => {
       }
       return state;
 
-    case "CHANCE_CARD": {
-      const playerIndex = state.players.findIndex(p => p.id === action.playerId);
-      if (playerIndex !== -1) {
-        const effect = Math.floor(Math.random() * 2);
-        switch (effect) {
-          case 0:
-            state.players[playerIndex].money += 5000;
-            break;
-          case 1:
-            state.players[playerIndex].money -= 50;
-            break;
+      case "CHANCE_CARD": {
+        const playerIndex = state.players.findIndex(p => p.id === action.playerId);
+        if (playerIndex !== -1) {
+            const effect = Math.floor(Math.random() * 2);
+            let message = '';
+            switch (effect) {
+                case 0:
+                    state.players[playerIndex].money += 50;
+                    message = "Získal jsi $50";
+                    break;
+                case 1:
+                    state.players[playerIndex].money -= 50;
+                    message = "Ztratil jsi $50!";
+                    break;
+            }
+            return { ...state, chanceCardMessage: message };
         }
-      }
-      return { ...state };
+        return { ...state };
     }
 
     case 'BUY_HOUSE': {
@@ -282,13 +284,13 @@ const playingReducer = (state: GameState, action: Action): GameState => {
       if (fieldIndex !== -1 && playerIndex !== -1) {
         const field = state.fields[fieldIndex] as Property;
         const player = state.players[playerIndex];
-        const housePrice = field.type === "PROPERTY" ? cities.find(city => city.id === field.cityid)?.pricehouse : undefined;
-    
+        const housePrice = (field as Property).type === "PROPERTY" ? cities.find(city => city.id === (field as Property).cityid)?.pricehouse : undefined;
+
         const ownsOtherPropertiesInCity = state.fields.filter(f =>
-          f.type === "PROPERTY" && f.cityid === field.cityid && state.ownership[f.id] === action.playerId
+          f.type === "PROPERTY" && (f as Property).cityid === (field as Property).cityid && state.ownership[f.id] === action.playerId
         ).length > 1;
-    
-    
+
+
         const totalCost = (housePrice || 0) * action.houseCount;
     
         if (field.type === "PROPERTY" && player.money >= totalCost && ownsOtherPropertiesInCity) {

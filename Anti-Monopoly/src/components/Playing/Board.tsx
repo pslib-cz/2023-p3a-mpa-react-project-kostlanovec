@@ -12,6 +12,7 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
     const [hoveredFieldId, setHoveredFieldId] = useState<number | null>(null);
     const [showBuyHouseDialog, setShowBuyHouseDialog] = useState<boolean>(false);
     const [selectedPropertyForHouse, setSelectedPropertyForHouse] = useState<Number>(0);
+    const [, setChanceCardMessage] = useState<string>('');
 
     const handleMouseEnter = (fieldId: number) => {
         setHoveredFieldId(fieldId);
@@ -124,6 +125,13 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
         }
     }, [currentPlayerId, playingState.players, playingState.ownership, fields]);
 
+    useEffect(() => {
+        if (playingState.chanceCardMessage) {
+            alert(playingState.chanceCardMessage);
+            setChanceCardMessage('');
+        }
+    }, [playingState.chanceCardMessage]);
+
     const handleDiceRoll = (value: number) => {
         movePlayer(currentPlayerId, value);
     };
@@ -150,6 +158,10 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
         else if (landedField && landedField.type === "PROPERTY" || landedField?.type === "TRANSPORT" && playingState.ownership[landedField.id] === currentPlayerId) {
             setShowBuyHouseDialog(true);
             setSelectedPropertyForHouse(landedField.id);
+        }
+
+        else if (landedField && landedField.type === "CHANCE_CARD") {
+            playingDispatch({ type: 'CHANCE_CARD', playerId });
         }
 
         else {
@@ -305,6 +317,8 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
                                 </>
                             )}
 
+                            {field.type === "ENERGY" &&(
+                            )}
                             {field.type === "ANTI_MONOPOLY_OFFICE" && (
                                 <>
                                     <p>Anti-monopolní úřad</p>
