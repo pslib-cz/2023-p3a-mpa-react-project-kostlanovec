@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import styles from './Board.module.css';
 import Dice from "react-dice-roll";
 import { PlayingContext } from "../../providers/PlayingProvider";
-import { Property, Start, Transport, cities, Tax, Pay } from "../../types/type";
+import { Property, Start, Transport, cities, Tax, Pay, Energy } from "../../types/type";
 import WindowsStats from "./WindowStats";
 const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: number, setCurrentPlayerId: (id: number) => void }) => {
     const [playingState, playingDispatch] = useContext(PlayingContext);
@@ -317,8 +317,13 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
                                 </>
                             )}
 
-                            {field.type === "ENERGY" &&(
+                            {field.type === "ENERGY" && (
+                            <>
+                            <img src={`img/${(field as Energy).name}.svg`} alt={(field as Energy).name} />
+                                <span>{(field as Energy).name}</span>
+                            </>
                             )}
+
                             {field.type === "ANTI_MONOPOLY_OFFICE" && (
                                 <>
                                     <p>Anti-monopolní úřad</p>
