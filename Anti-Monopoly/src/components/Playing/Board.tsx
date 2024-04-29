@@ -11,7 +11,7 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
     const [nextPlayerId, setNextPlayerId] = useState<number>(0);
     const [hoveredFieldId, setHoveredFieldId] = useState<number | null>(null);
     const [showBuyHouseDialog, setShowBuyHouseDialog] = useState<boolean>(false);
-    const [selectedPropertyForHouse, setSelectedPropertyForHouse] = useState<Number>(0);
+    const [selectedPropertyForHouse] = useState<Number>(0);
     const [, setChanceCardMessage] = useState<string>('');
 
     const handleMouseEnter = (fieldId: number) => {
@@ -24,8 +24,6 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
     
     const renderDetails = () => {
         const hoveredField = fields.find((field) => field.id === hoveredFieldId);
-        console.log(hoveredField?.type)
-        console.log(hoveredField);
         if (!hoveredField) return null;
 
         if (hoveredField.type === "PROPERTY") {
@@ -139,41 +137,40 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
     const movePlayer = (playerId: number, rollValue: number) => {
         const currentPlayer = playingState.players.find(player => player.id === playerId);
         if (!currentPlayer) return;
-
+    
         const currentPositionId = currentPlayer.position;
         const newPositionId = ((currentPositionId - 1 + rollValue) % fields.length) + 1;
 
-        playingDispatch({ type: 'MOVE_PLAYER', playerId, newPositionId: newPositionId });
-
+    
         const landedField = fields.find(field => field.id === newPositionId);
-        if (landedField && landedField.type === "PROPERTY" || (landedField && landedField.type === "TRANSPORT" &&  playingState.ownership[landedField.id] === undefined)) {
-            const propertyPrice = (landedField as Property).price;
-            if ((currentPlayer.money ?? 0) >= propertyPrice) {
-                setShowBuyPropertyDialog(true);
+        playingDispatch({ type: 'MOVE_PLAYER', playerId, newPositionId: newPositionId });
+        if (landedField && (landedField.type === "PROPERTY" || landedField.type === "TRANSPORT")) {
+
+            if (playingState.ownership[landedField.id] === undefined) {
+                const propertyPrice = (landedField as Property).price;
+                if ((currentPlayer.money ?? 0) >= propertyPrice) {
+                    setShowBuyPropertyDialog(true);
+                } else {
+                    setCurrentPlayerId((playerId % playingState.players.length) + 1);
+                }
             } else {
                 setCurrentPlayerId((playerId % playingState.players.length) + 1);
             }
-        }
-
-        else if (landedField && landedField.type === "PROPERTY" || landedField?.type === "TRANSPORT" && playingState.ownership[landedField.id] === currentPlayerId) {
-            setShowBuyHouseDialog(true);
-            setSelectedPropertyForHouse(landedField.id);
-        }
-
-        else if (landedField && landedField.type === "CHANCE_CARD") {
+        } else if (landedField && landedField.type === "CHANCE_CARD") {
             playingDispatch({ type: 'CHANCE_CARD', playerId });
-        }
-
-        else {
+        } else {
             setCurrentPlayerId((playerId % playingState.players.length) + 1);
         }
     };
+    
 
     const handleDialogResponse = (response: boolean) => {
         if (response) {
 
             const newPositionId = playingState.players.find(player => player.id === currentPlayerId)?.position || 0;
+            console.log(newPositionId);
             const propertyField = fields.find(field => field.id === newPositionId) as Property;
+            console.log(propertyField);
             if (propertyField && (propertyField.type === "PROPERTY" || propertyField.type === "TRANSPORT") && playingState.ownership[newPositionId] === undefined) {
                 const propertyPrice = propertyField.price;
                 playingDispatch({
@@ -260,25 +257,23 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
                             onMouseEnter={() => (field.type === "PROPERTY" || field.type === "TRANSPORT") && handleMouseEnter(field.id)}
                             onMouseLeave={handleMouseLeave}
                         >
-                            {field.type === "PROPERTY" && (
-                                <div>
-                                    {field.type === "PROPERTY" && <div>{(field as Property).name}</div>}
+                                                    {field.type === "PROPERTY" && (
+                            <div>
+                                {field.type === "PROPERTY" && <div>{(field as Property).name}</div>}
 
-                                    {playingState.ownership[field.id] !== undefined && (
-                                        <div
-                                            className={styles["property-owner"]}
-                                            style={{ backgroundColor: "red" }}
-                                        >
-                                            <div>
-                                                {playingState.players.find(player => player.id === playingState.ownership[field.id])?.id
-                                                    ? `HRÁČ ${playingState.players.find(player => player.id === playingState.ownership[field.id])?.id}`
-                                                    : ''}
-                                            </div>
+                                {playingState.ownership[field.id] !== undefined && (
+                                    <div
+                                        className={styles["property-owner"]}
+                                        style={{ backgroundColor: "red" }}
+                                    >
+                                        <div>
+                                            {`HRÁČ ${playingState.players.find(player => player.id === playingState.ownership[field.id])?.id}`}
                                         </div>
-                                    )}
-                                    {field.type === "PROPERTY" && <div>{(field as Property).price}</div>}
-                                </div>
-                            )}
+                                    </div>
+                                )}
+                                {field.type === "PROPERTY" && <div>{(field as Property).price}</div>}
+                            </div>
+                        )}
 
                             {field.type === "TRANSPORT" && (
                                 <div>
@@ -343,11 +338,6 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
 
                     <div className={styles["blank_field"]}>
                         <WindowsStats currentPlayerId={currentPlayerId} />
-                        {/* obrázky na pro prázdné políčko na hrací desce/*}            
-                        {/* <img src="img/city.png" alt="Obrázek vlevo" className={styles["img-left"]} />
-                        <img src="img/city.png" alt="Obrázek vpravo" className={styles["img-right"]} />
-                        <img src="img/city.png" alt="Obrázek nahoře" className={styles["img-top"]} />
-                        <img src="img/city.png" alt="Obrázek dole" className={styles["img-bottom"]} /> */}
                     </div>
                     {showBuyPropertyDialog && (
                         <div className={styles.overlay}>

@@ -71,6 +71,7 @@ const initialState: GameState = {
 };
 
 const playingReducer = (state: GameState, action: Action): GameState => {
+  console.log(action, state)
   switch (action.type) {
     case "INIT_PLAYERS":
       const playersInit: PlayingPlayer[] = action.players.map(player => ({
@@ -117,6 +118,30 @@ const playingReducer = (state: GameState, action: Action): GameState => {
           );
           break;
 
+        case "ENERGY":{
+          const energyOwner = state.ownership[newPositionId];
+          if (energyOwner && energyOwner !== action.playerId) {
+          const energyPropertiesOwned = Object.keys(state.ownership).filter(
+            key => state.ownership[parseInt(key)] === energyOwner && state.fields[parseInt(key) - 1].type === "ENERGY"
+          ).length;
+
+          let rentAmount = 4;
+          if (energyPropertiesOwned > 1) {
+            rentAmount = 10;
+          }
+          rentAmount = Math.min(rentAmount, 320);
+          updatedPlayers = updatedPlayers.map(p => {
+            if (p.id === action.playerId) {
+            return { ...p, money: p.money - rentAmount };
+            } else if (p.id === energyOwner) {
+            return { ...p, money: p.money + rentAmount };
+            }
+            return p;
+          });
+          }
+          break;
+        }
+
         case "TRANSPORT": {
           console.log("TRANSPORT");
           const transportOwner = state.ownership[newPositionId];
@@ -147,18 +172,18 @@ const playingReducer = (state: GameState, action: Action): GameState => {
           const propertyOwner = state.ownership[newPositionId];
           if (propertyOwner && propertyOwner !== action.playerId && field.type === "PROPERTY") {
 
-          /*const propertiesOwnedByOwner = Object.keys(state.ownership)
+          const propertiesOwnedByOwner = Object.keys(state.ownership)
             .filter(key => state.ownership[parseInt(key)] === propertyOwner)
             .map(key => state.fields[parseInt(key) - 1])
-            .filter(field => field.type === "PROPERTY");*/
+            .filter(field => field.type === "PROPERTY");
 
-          /*const isMonopoly = propertiesOwnedByOwner
-            .filter(property => property.cityid === field.cityid).length > 1;
+          const isMonopoly = propertiesOwnedByOwner
+            .filter(property => property.type === "PROPERTY" && (property as Property).cityid === (field as Property).cityid).length > 1;
 
-          let rentAmount = field.rent;
+          let rentAmount = (field as Property).rent;
           if (isMonopoly) {
             rentAmount *= 2;
-          }*/
+          }
 
           updatedPlayers = updatedPlayers.map(p => {
             if (p.id === action.playerId) {
@@ -241,7 +266,6 @@ const playingReducer = (state: GameState, action: Action): GameState => {
       return state;
 
     case 'BUY_PROPERTY':
-      if (state.fields[action.fieldId - 1].type === "PROPERTY" || state.fields[action.fieldId - 1].type === "TRANSPORT") {
         return {
           ...state,
           ownership: { ...state.ownership, [action.fieldId]: action.playerId },
@@ -251,12 +275,6 @@ const playingReducer = (state: GameState, action: Action): GameState => {
               : p
           ),
         };
-      }
-      else {
-        console.log("není možné koupit");
-        console.log(state.fields[action.fieldId - 1].type);
-      }
-      return state;
 
       case "CHANCE_CARD": {
         const playerIndex = state.players.findIndex(p => p.id === action.playerId);
