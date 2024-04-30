@@ -99,6 +99,7 @@ export type AntiMonopolyOffice = Field & {
 
 export type Energy = Field & {
     type: FieldType.ENERGY;
+    price: number;
     name: string;
 };
 

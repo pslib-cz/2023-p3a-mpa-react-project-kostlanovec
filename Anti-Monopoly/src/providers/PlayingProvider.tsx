@@ -17,7 +17,7 @@ const initialFields: Field[] = [
   { type: FieldType.PROPERTY, name: "Syntagma", cityid: 107, price: 400, rent: 40, houses: 0, id: 40 } as Property,
   { type: FieldType.PROPERTY, name: "Plaza Mayor", cityid: 103, price: 140, rent: 14, houses: 0, id: 12 } as Property,
   { type: FieldType.PAY, classicMoney: 75, id: 39 } as Pay,
-  { type: FieldType.ENERGY, name: "Elektrárna", id: 13 } as Energy,
+  { type: FieldType.ENERGY, name: "Elektrárna", id: 13, price: 200 } as Energy,
   { type: FieldType.PROPERTY, name: "La Plaka", cityid: 107, price: 350, rent: 35, houses: 0, id: 38 } as Property,
   { type: FieldType.PROPERTY, name: "Gran Via", cityid: 103, price: 140, rent: 14, houses: 0, id: 14 } as Property,
   { type: FieldType.CHANCE_CARD, id: 37 } as ChanceCard,
@@ -34,7 +34,7 @@ const initialFields: Field[] = [
   { type: FieldType.PROPERTY, name: "Kalverstraat", cityid: 105, price: 200, rent: 20, houses: 0, id: 20 } as Property,
   { type: FieldType.JAIL, id: 31 } as Jail,
   { type: FieldType.PROPERTY, name: "Nieuwstraat", cityid: 106, price: 280, rent: 28, houses: 0, id: 30 } as Property,
-  { type: FieldType.ENERGY, name: "Plynárna", id: 29 } as Energy,
+  { type: FieldType.ENERGY, name: "Plynárna", id: 29, price: 200 } as Energy,
   { type: FieldType.PROPERTY, name: "Hoogstraat", cityid: 106, price: 260, rent: 26, houses: 0, id: 28 } as Property,
   { type: FieldType.PROPERTY, name: "Grote Markt", cityid: 106, price: 260, rent: 26, houses: 0, id: 27 } as Property,
   { type: FieldType.TRANSPORT, name: "Železniční doprava",  price: 240, rent: 24, id: 26, image: "Train.svg"} as Transport,
@@ -46,7 +46,7 @@ const initialFields: Field[] = [
 ];
 
 type Action =
-  | { type: "MOVE_PLAYER"; playerId: number; newPositionId: number; }
+  | { type: "MOVE_PLAYER"; playerId: number; newPositionId: number; diceRoll: number}
   | { type: "INIT_PLAYERS"; defaultMoney: number; defaultPosition: number; players: Player[] }
   | { type: "BUY_PROPERTY"; playerId: number; fieldId: number, price: number }
   | { type: "BUY_HOUSE"; playerId: number; fieldId: number; houseCount: number }
@@ -62,8 +62,8 @@ type Action =
 
 const initialState: GameState = {
   players: [
-    { id: 1, money: 2000, role: Role.MONOPOLIST, position: 1, isBankrupt: false, isJailed: false },
-    { id: 2, money: 2000, role: Role.CONCURENT, position: 1, isBankrupt: false, isJailed: false },
+    { id: 1, money: 2000, role: Role.MONOPOLIST, position: 1, isBankrupt: false, isJailed: false, color: "red" },
+    { id: 2, money: 2000, role: Role.CONCURENT, position: 1, isBankrupt: false, isJailed: false, color: "red" },
   ],
   isPlayingPlayerid: 1,
   fields: initialFields,
@@ -71,7 +71,6 @@ const initialState: GameState = {
 };
 
 const playingReducer = (state: GameState, action: Action): GameState => {
-  console.log(action, state)
   switch (action.type) {
     case "INIT_PLAYERS":
       const playersInit: PlayingPlayer[] = action.players.map(player => ({
@@ -80,6 +79,7 @@ const playingReducer = (state: GameState, action: Action): GameState => {
         position: action.defaultPosition,
         isBankrupt: false,
         isJailed: false,
+        color: "red"
       }));
 
       return {
@@ -118,29 +118,28 @@ const playingReducer = (state: GameState, action: Action): GameState => {
           );
           break;
 
-        case "ENERGY":{
-          const energyOwner = state.ownership[newPositionId];
-          if (energyOwner && energyOwner !== action.playerId) {
-          const energyPropertiesOwned = Object.keys(state.ownership).filter(
-            key => state.ownership[parseInt(key)] === energyOwner && state.fields[parseInt(key) - 1].type === "ENERGY"
-          ).length;
-
-          let rentAmount = 4;
-          if (energyPropertiesOwned > 1) {
-            rentAmount = 10;
-          }
-          rentAmount = Math.min(rentAmount, 320);
-          updatedPlayers = updatedPlayers.map(p => {
-            if (p.id === action.playerId) {
-            return { ...p, money: p.money - rentAmount };
-            } else if (p.id === energyOwner) {
-            return { ...p, money: p.money + rentAmount };
+          case "ENERGY": {
+            const energyOwner = state.ownership[newPositionId];
+            if (energyOwner && energyOwner !== action.playerId) {
+              const diceRoll = action.diceRoll;
+              let rentAmount = 4;
+  
+              if (diceRoll === 5) {
+                rentAmount = 20;
+              }
+  
+              rentAmount = Math.min(rentAmount, 320);
+              updatedPlayers = updatedPlayers.map(p => {
+                if (p.id === action.playerId) {
+                  return { ...p, money: p.money - rentAmount };
+                } else if (p.id === energyOwner) {
+                  return { ...p, money: p.money + rentAmount };
+                }
+                return p;
+              });
             }
-            return p;
-          });
+            break;
           }
-          break;
-        }
 
         case "TRANSPORT": {
           console.log("TRANSPORT");
@@ -266,6 +265,16 @@ const playingReducer = (state: GameState, action: Action): GameState => {
       return state;
 
     case 'BUY_PROPERTY':
+      console.log(action, state);
+      console.log({
+        ...state,
+        ownership: { ...state.ownership, [action.fieldId]: action.playerId }, // Fix syntax error
+        players: state.players.map(p =>
+          p.id === action.playerId
+            ? { ...p, money: p.money - action.price }
+            : p
+        ),
+      });
         return {
           ...state,
           ownership: { ...state.ownership, [action.fieldId]: action.playerId },
@@ -373,6 +382,7 @@ const playingReducer = (state: GameState, action: Action): GameState => {
           position: 0,
           isBankrupt: false,
           isJailed: false,
+          color: "red"
         };
         return { ...state, players: [...state.players, newPlayer] };
       }
