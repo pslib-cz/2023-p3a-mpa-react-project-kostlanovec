@@ -256,23 +256,23 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
                             onMouseEnter={() => (field.type === "PROPERTY" || field.type === "TRANSPORT") && handleMouseEnter(field.id)}
                             onMouseLeave={handleMouseLeave}
                         >
-                            {field.type === "PROPERTY" && (
-                                <div>
-                                    {field.type === "PROPERTY" && <div>{(field as Property).name}</div>}
+                                                    {field.type === "PROPERTY" && (
+                            <div>
+                                {field.type === "PROPERTY" && <div>{(field as Property).name}</div>}
 
-                                    {playingState.ownership[field.id] !== undefined && (
-                                        <div
-                                            className={styles["property-owner"]}
-                                            style={{ backgroundColor: "red" }}
-                                        >
-                                            <div>
-                                                {`HRÁČ ${playingState.players.find(player => player.id === playingState.ownership[field.id])?.id}`}
-                                            </div>
+                                {playingState.ownership[field.id] !== undefined && (
+                                    <div
+                                        className={styles["property-owner"]}
+                                        style={{ backgroundColor: "red" }}
+                                    >
+                                        <div>
+                                            {`HRÁČ ${playingState.players.find(player => player.id === playingState.ownership[field.id])?.id}`}
                                         </div>
-                                    )}
-                                    {field.type === "PROPERTY" && <div>{(field as Property).price}</div>}
-                                </div>
-                            )}
+                                    </div>
+                                )}
+                                {field.type === "PROPERTY" && <div>{(field as Property).price}</div>}
+                            </div>
+                        )}
 
                             {field.type === "TRANSPORT" && (
                                 <div>
@@ -340,7 +340,7 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
                                     <div
                                         key={playerIndex}
                                         className={styles["player"]}
-                                        style={{ backgroundColor: "blue", position: "absolute", top: `${playerIndex * 20}px` }}
+                                        style={{ backgroundColor: "blue" }}
                                     ></div>
                                 )
                             ))}

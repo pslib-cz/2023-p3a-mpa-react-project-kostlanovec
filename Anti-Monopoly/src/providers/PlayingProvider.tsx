@@ -92,6 +92,14 @@ const playingReducer = (state: GameState, action: Action): GameState => {
       if (playerMoving) {
       const newPositionId = action.newPositionId;
 
+      if (playerMoving.isJailed) {
+        if (action.diceRoll === 6) {
+          playerMoving.isJailed = false;
+        } else {
+          return state;
+        }
+      }
+
       let updatedPlayers = state.players.map(p =>
         p.id === action.playerId
         ? { ...p, position: newPositionId }
