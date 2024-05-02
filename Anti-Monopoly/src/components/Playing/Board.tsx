@@ -8,7 +8,6 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
     const [playingState, playingDispatch] = useContext(PlayingContext);
     const [showBuyPropertyDialog, setShowBuyPropertyDialog] = useState<boolean>(false);
     const [showSellPropertyDialog, setShowSellPropertyDialog] = useState<boolean>(false);
-    const [nextPlayerId, setNextPlayerId] = useState<number>(0);
     const [hoveredFieldId, setHoveredFieldId] = useState<number | null>(null);
     const [showBuyHouseDialog, setShowBuyHouseDialog] = useState<boolean>(false);
     const [selectedPropertyForHouse] = useState<Number>(0);
@@ -136,10 +135,8 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
     const movePlayer = (playerId: number, rollValue: number) => {
         const currentPlayer = playingState.players.find(player => player.id === playerId);
         if (!currentPlayer) return;
-    
         const currentPositionId = currentPlayer.position;
         const newPositionId = ((currentPositionId - 1 + rollValue) % fields.length) + 1;
-
     
         const landedField = fields.find(field => field.id === newPositionId);
         playingDispatch({ type: 'MOVE_PLAYER', playerId, newPositionId: newPositionId, diceRoll: rollValue });
@@ -149,21 +146,28 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
                 if ((currentPlayer.money ?? 0) >= propertyPrice) {
                     setShowBuyPropertyDialog(true);
                 } else {
-                    setCurrentPlayerId((playerId % playingState.players.length) + 1);
+                    moveNextNonBankruptPlayer(playerId);
                 }
             } else {
-                setCurrentPlayerId((playerId % playingState.players.length) + 1);
+                moveNextNonBankruptPlayer(playerId);
             }
         } else if (landedField && landedField.type === "CHANCE_CARD") {
             playingDispatch({ type: 'CHANCE_CARD', playerId });
         } else {
-            setCurrentPlayerId((playerId % playingState.players.length) + 1);
+            moveNextNonBankruptPlayer(playerId);
         }
     };
-
+    
+    const moveNextNonBankruptPlayer = (currentPlayerId: number) => {
+        let nextPlayerId = (currentPlayerId % playingState.players.length) + 1;
+        while (playingState.players.find(player => player.id === nextPlayerId)?.isBankrupt) {
+            nextPlayerId = (nextPlayerId % playingState.players.length) + 1;
+        }
+        setCurrentPlayerId(nextPlayerId);
+    };
+    
     const handleDialogResponse = (response: boolean) => {
         if (response) {
-
             const newPositionId = playingState.players.find(player => player.id === currentPlayerId)?.position || 0;
             const propertyField = fields.find(field => field.id === newPositionId) as Property;
             if (propertyField && (propertyField.type === "PROPERTY" || propertyField.type === "TRANSPORT" || propertyField.type === "ENERGY") && playingState.ownership[newPositionId] === undefined) {
@@ -175,16 +179,9 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
                     price: propertyPrice
                 });
             }
-            setCurrentPlayerId((currentPlayerId % playingState.players.length) + 1);
+            moveNextNonBankruptPlayer(currentPlayerId);
         }
         setShowBuyPropertyDialog(false);
-        if (nextPlayerId) {
-            setCurrentPlayerId(nextPlayerId);
-            setNextPlayerId(0);
-        }
-        else{
-            setCurrentPlayerId((currentPlayerId % playingState.players.length) + 1);
-        }
     };
 
     const findPropertiesOwnedByPlayer = (playerId: number) => {
@@ -275,6 +272,7 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
 
                             {field.type === "TRANSPORT" && (
                                 <div>
+                                      <img className={styles["fieldimage"]} src={`img/${(field as Transport).image}`} />
                                     {playingState.ownership[field.id] !== undefined && (
                                         <div
                                             className={styles["property-owner"]}
@@ -287,13 +285,11 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
                                             </div>
                                         </div>
                                     )}
+                                
                                 </div>
                             )}
-                            {field.type === "TRANSPORT" && (
-                                <img src={`img/${(field as Transport).image}`} />
-                            )}
                             {field.type === "CHANCE_CARD" && (
-                                <img src="img/changecard.svg"></img>)}
+                                <img className={styles["fieldimage"]} src="img/changecard.svg"></img>)}
                             {field.type === "PAY" && (
                                 <p>Zaplať {(field as Pay).classicMoney}</p>
                             )}
@@ -301,7 +297,7 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
                                 <p>Daně {(field as Tax).money}</p>
                             )}
                             {field.type === "JAIL" && (
-                                <img src="img/jail.svg"></img>
+                                <img className={styles["fieldimage"]} src="img/jail.svg"></img>
                             )}
                             {field.type === "START" && (
                                 <>
@@ -312,7 +308,6 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
 
                             {field.type === "ENERGY" && (
                                 <div>
-                                    <span>{(field as Energy).name}</span>
                                     {playingState.ownership[field.id] !== undefined && (
                                         <div
                                             className={styles["property-owner"]}
@@ -325,7 +320,7 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
                                             </div>
                                         </div>
                                     )}
-                                    <img src={`img/${(field as Energy).name}.svg`} alt={(field as Energy).name} />
+                                        <img  className={styles["fieldimage"]} src={`img/${(field as Energy).name}.svg`} alt={(field as Energy).name}/>
                                 </div>
                             )}
 

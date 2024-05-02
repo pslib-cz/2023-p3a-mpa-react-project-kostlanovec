@@ -58,31 +58,16 @@
     z-index: 999;
 }
 
-.img-left {
-    transform: rotate(90deg) translateY(50%);
-}
-
-.img-right {
-    transform: rotate(-90deg) translateX(-50%);
-    }
-
-.img-top {
-    transform: rotate(180deg);
-    }
-
-.img-bottom {
-    bottom: 0;
-    }
-
 .dices{
     position: absolute;
     right: 20%;
     bottom: 20%;
 }
 
-.field > img{
-    width: 100%;
+.fieldimage{
     height: 100%;
+    width: 100%;
+    object-fit: contain;
 }
 
 .property-details{

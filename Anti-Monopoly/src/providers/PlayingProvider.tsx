@@ -64,7 +64,8 @@ type Action =
 const initialState: GameState = {
   players: [
     { id: 1, money: 2000, role: Role.MONOPOLIST, position: 1, isBankrupt: false, isJailed: false, color: "red", isJailedNumberOfAttempts: 0},
-    { id: 2, money: 2000, role: Role.CONCURENT, position: 1, isBankrupt: false, isJailed: false, color: "red", isJailedNumberOfAttempts: 0},
+    { id: 2, money: 2000, role: Role.CONCURENT, position: 1, isBankrupt: true, isJailed: false, color: "red", isJailedNumberOfAttempts: 0},
+    { id: 3, money: 2000, role: Role.CONCURENT, position: 1, isBankrupt: false, isJailed: false, color: "red", isJailedNumberOfAttempts: 0},
   ],
   isPlayingPlayerid: 1,
   fields: initialFields,
@@ -127,6 +128,7 @@ const playingReducer = (state: GameState, action: Action): GameState => {
         : p
       );
 
+      // na pevno definovaný start
       if (newPositionId < playerMoving.position || newPositionId === 1) {
         updatedPlayers = updatedPlayers.map(p =>
         p.id === action.playerId
@@ -303,7 +305,7 @@ const playingReducer = (state: GameState, action: Action): GameState => {
       console.log(action, state);
       console.log({
         ...state,
-        ownership: { ...state.ownership, [action.fieldId]: action.playerId }, // Fix syntax error
+        ownership: { ...state.ownership, [action.fieldId]: action.playerId },
         players: state.players.map(p =>
           p.id === action.playerId
             ? { ...p, money: p.money - action.price }

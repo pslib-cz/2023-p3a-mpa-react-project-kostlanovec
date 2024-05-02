@@ -17,11 +17,15 @@ const WindowsStats = ({ currentPlayerId }: { currentPlayerId: number }) => {
         }
     };
 
-    const sortedPlayers = [...players].sort((a, b) => {
+    const sortedPlayers = [...players]
+    .filter(player => !player.isBankrupt)
+    .sort((a, b) => {
         if (a.id > currentPlayerId && b.id > currentPlayerId) return a.id - b.id;
         if (a.id < currentPlayerId && b.id < currentPlayerId) return a.id - b.id;
         return a.id > currentPlayerId ? -1 : 1;
     });
+
+    console.log(sortedPlayers);
 
     return (
         <div className="Windows-stats">
