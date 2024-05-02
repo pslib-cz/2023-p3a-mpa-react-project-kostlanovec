@@ -111,7 +111,6 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
                 </div>
             );
         }
-
         return null;
     };
 
@@ -344,6 +343,11 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
                                     ></div>
                                 )
                             ))}
+                            {field.type === "GO_JAIL" && (
+                                <>
+                                  <p>Jdi do vězení</p>
+                              </>
+                            )}
                         </div>
                     ))}
 
@@ -360,7 +364,6 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
                             </div>
                         </div>
                     )}
-
                     {showSellPropertyDialog && (
                         <div className={styles.overlay}>
                             <div className={styles.modal}>

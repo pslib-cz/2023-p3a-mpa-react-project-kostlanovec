@@ -1,7 +1,7 @@
 import React, { PropsWithChildren, createContext, useReducer } from 'react';
-import { Field, PlayingPlayer, Player, GameState, cities, Role, FieldType, Start, Tax, Jail, Pay, ChanceCard, Property, Transport, AntiMonopolyOffice, Energy} from '../types/type';
+import { Field, PlayingPlayer, Player, GameState, cities, Role, FieldType, Start, Tax, Jail, Pay, ChanceCard, Property, Transport, AntiMonopolyOffice, Energy, GoJail} from '../types/type';
 
-// definování pole hráče.
+// Definování políček. 
 const initialFields: Field[] = [
   { type: FieldType.START, money: 200, id: 1 } as Start,
   { type: FieldType.PROPERTY, cityid: 100, name: "Corso Impero", price: 60, rent: 6, houses: 0, id: 2 } as Property,
@@ -32,7 +32,7 @@ const initialFields: Field[] = [
   { type: FieldType.PROPERTY, name: "Leidsestraat", cityid: 105, price: 180, rent: 18, houses: 0, id: 19 } as Property,
   { type: FieldType.PROPERTY, name: "Park Lane", cityid: 104, price: 300, rent: 30, houses: 0, id: 32 } as Property,
   { type: FieldType.PROPERTY, name: "Kalverstraat", cityid: 105, price: 200, rent: 20, houses: 0, id: 20 } as Property,
-  { type: FieldType.JAIL, id: 31 } as Jail,
+  { type: FieldType.GO_JAIL, id: 31 } as GoJail,
   { type: FieldType.PROPERTY, name: "Nieuwstraat", cityid: 106, price: 280, rent: 28, houses: 0, id: 30 } as Property,
   { type: FieldType.ENERGY, name: "Plynárna", id: 29, price: 200 } as Energy,
   { type: FieldType.PROPERTY, name: "Hoogstraat", cityid: 106, price: 260, rent: 26, houses: 0, id: 28 } as Property,
@@ -47,6 +47,7 @@ const initialFields: Field[] = [
 
 type Action =
   | { type: "MOVE_PLAYER"; playerId: number; newPositionId: number; diceRoll: number}
+  | { type: "MOVE_TO_JAIL"; playerId: number }
   | { type: "INIT_PLAYERS"; defaultMoney: number; defaultPosition: number; players: Player[] }
   | { type: "BUY_PROPERTY"; playerId: number; fieldId: number, price: number }
   | { type: "BUY_HOUSE"; playerId: number; fieldId: number; houseCount: number }
@@ -62,8 +63,8 @@ type Action =
 
 const initialState: GameState = {
   players: [
-    { id: 1, money: 2000, role: Role.MONOPOLIST, position: 1, isBankrupt: false, isJailed: false, color: "red" },
-    { id: 2, money: 2000, role: Role.CONCURENT, position: 1, isBankrupt: false, isJailed: false, color: "red" },
+    { id: 1, money: 2000, role: Role.MONOPOLIST, position: 1, isBankrupt: false, isJailed: false, color: "red", isJailedNumberOfAttempts: 0},
+    { id: 2, money: 2000, role: Role.CONCURENT, position: 1, isBankrupt: false, isJailed: false, color: "red", isJailedNumberOfAttempts: 0},
   ],
   isPlayingPlayerid: 1,
   fields: initialFields,
@@ -79,7 +80,8 @@ const playingReducer = (state: GameState, action: Action): GameState => {
         position: action.defaultPosition,
         isBankrupt: false,
         isJailed: false,
-        color: "red"
+        color: "red",
+        isJailedNumberOfAttempts: 0
       }));
 
       return {
@@ -87,17 +89,36 @@ const playingReducer = (state: GameState, action: Action): GameState => {
         players: playersInit,
       };
       
+      
     case "MOVE_PLAYER": {
       const playerMoving = state.players.find(p => p.id === action.playerId);
       if (playerMoving) {
       const newPositionId = action.newPositionId;
 
+      // políčko jdi do vězení
+      if (newPositionId === 31) {
+          return {
+              ...state,
+              players: state.players.map(p =>
+                  p.id === action.playerId ? { ...p, position: 11, isJailed: true } : p
+              ),
+          };
+      }
+
       if (playerMoving.isJailed) {
-        if (action.diceRoll === 6) {
-          playerMoving.isJailed = false;
+        if (action.diceRoll !== 6) {
+          playerMoving.isJailedNumberOfAttempts += 3;
         } else {
-          return state;
+          playerMoving.isJailed = false;
+          playerMoving.isJailedNumberOfAttempts = 0;
         }
+    
+        return {
+          ...state,
+          players: state.players.map(p =>
+            p.id === playerMoving.id ? { ...p, ...playerMoving } : p
+          ),
+        };
       }
 
       let updatedPlayers = state.players.map(p =>
@@ -116,6 +137,12 @@ const playingReducer = (state: GameState, action: Action): GameState => {
 
       const field = state.fields.find(f => f.id === newPositionId);
       if (field) {
+        if (playerMoving.role === Role.MONOPOLIST && playerMoving.isJailed) {
+          return {
+              ...state,
+              players: updatedPlayers,
+          };
+      }
         switch (field.type) {
         case "PAY":
           const payField = field as Pay;
@@ -390,7 +417,8 @@ const playingReducer = (state: GameState, action: Action): GameState => {
           position: 0,
           isBankrupt: false,
           isJailed: false,
-          color: "red"
+          color: "red",
+          isJailedNumberOfAttempts: 0
         };
         return { ...state, players: [...state.players, newPlayer] };
       }
@@ -412,7 +440,6 @@ const playingReducer = (state: GameState, action: Action): GameState => {
             : player
         ),
       };
-
     case 'DECLARE_BANKRUPTCY':
       const updatedOwnership = { ...state.ownership };
       Object.keys(updatedOwnership).forEach(y => {

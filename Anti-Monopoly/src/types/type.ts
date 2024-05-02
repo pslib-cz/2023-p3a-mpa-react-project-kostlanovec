@@ -22,6 +22,7 @@ export type PlayingPlayer = {
     isBankrupt: boolean;
     isJailed: boolean;
     color: string;
+    isJailedNumberOfAttempts: number;
 };
 
 export type Player = {
