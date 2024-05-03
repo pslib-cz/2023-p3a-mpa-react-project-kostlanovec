@@ -254,7 +254,7 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
                         >
                             {field.type === "PROPERTY" && (
                                 <div>
-                                    {field.type === "PROPERTY" && <div>{(field as Property).name}</div>}
+                                    <div>{(field as Property).name}</div>
 
                                     {playingState.ownership[field.id] !== undefined && (
                                         <div
@@ -329,6 +329,7 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
                                     <p>Anti-monopolní úřad</p>
                                 </>
                             )}
+                            <div className={styles["gridplayers"]}>
                             {playingState.players
                                 .filter(player => !player.isBankrupt)
                                 .map((player, playerIndex) => (
@@ -339,6 +340,7 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
                                     ></div>
                                     )
                                 ))}
+                            </div>
                             {field.type === "GO_JAIL" && (
                                 <>
                                   <p>Jdi do vězení</p>
