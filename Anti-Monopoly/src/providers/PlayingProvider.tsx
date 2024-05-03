@@ -64,8 +64,8 @@ type Action =
 const initialState: GameState = {
   players: [
     { id: 1, money: 2000, role: Role.MONOPOLIST, position: 1, isBankrupt: false, isJailed: false, color: "red", isJailedNumberOfAttempts: 0},
-    { id: 2, money: 2000, role: Role.CONCURENT, position: 1, isBankrupt: true, isJailed: false, color: "red", isJailedNumberOfAttempts: 0},
-    { id: 3, money: 2000, role: Role.CONCURENT, position: 1, isBankrupt: false, isJailed: false, color: "red", isJailedNumberOfAttempts: 0},
+    { id: 2, money: 2000, role: Role.CONCURENT, position: 1, isBankrupt: true, isJailed: false, color: "blue", isJailedNumberOfAttempts: 0},
+    { id: 3, money: 2000, role: Role.CONCURENT, position: 1, isBankrupt: false, isJailed: false, color: "yellow", isJailedNumberOfAttempts: 0},
   ],
   isPlayingPlayerid: 1,
   fields: initialFields,
@@ -410,8 +410,9 @@ const playingReducer = (state: GameState, action: Action): GameState => {
     }
 
     case "ADD_PLAYER":
-      console.log("přidání hráče");
       if (state.players.length < 6) {
+        const availableColors = ["light-green", "brown", "pink", "dark-green", "purple", "yellow", "orange"];
+        const randomColor = availableColors[Math.floor(Math.random() * availableColors.length)];    
         const newPlayer: PlayingPlayer = {
           id: state.players.length + 1,
           role: Role.CONCURENT,
@@ -419,7 +420,7 @@ const playingReducer = (state: GameState, action: Action): GameState => {
           position: 0,
           isBankrupt: false,
           isJailed: false,
-          color: "red",
+          color: randomColor,
           isJailedNumberOfAttempts: 0
         };
         return { ...state, players: [...state.players, newPlayer] };

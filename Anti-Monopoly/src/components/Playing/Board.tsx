@@ -252,31 +252,31 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
                             onMouseEnter={() => (field.type === "PROPERTY" || field.type === "TRANSPORT") && handleMouseEnter(field.id)}
                             onMouseLeave={handleMouseLeave}
                         >
-                                                    {field.type === "PROPERTY" && (
-                            <div>
-                                {field.type === "PROPERTY" && <div>{(field as Property).name}</div>}
-
-                                {playingState.ownership[field.id] !== undefined && (
-                                    <div
-                                        className={styles["property-owner"]}
-                                        style={{ backgroundColor: "red" }}
-                                    >
-                                        <div>
-                                            {`HRÁČ ${playingState.players.find(player => player.id === playingState.ownership[field.id])?.id}`}
-                                        </div>
-                                    </div>
-                                )}
-                                {field.type === "PROPERTY" && <div>{(field as Property).price}</div>}
-                            </div>
-                        )}
-
-                            {field.type === "TRANSPORT" && (
+                            {field.type === "PROPERTY" && (
                                 <div>
-                                      <img className={styles["fieldimage"]} src={`img/${(field as Transport).image}`} />
+                                    {field.type === "PROPERTY" && <div>{(field as Property).name}</div>}
+
                                     {playingState.ownership[field.id] !== undefined && (
                                         <div
                                             className={styles["property-owner"]}
-                                            style={{ backgroundColor: "red" }}
+                                            style={{ backgroundColor: playingState.players.find(player => player.id === playingState.ownership[field.id])?.color }}
+                                        >
+                                            <div>
+                                                {`HRÁČ ${playingState.players.find(player => player.id === playingState.ownership[field.id])?.id}`}
+                                            </div>
+                                        </div>
+                                    )}
+                                    {field.type === "PROPERTY" && <div>{(field as Property).price}</div>}
+                                </div>
+                            )}
+
+                            {field.type === "TRANSPORT" && (
+                                <div>
+                                    <img className={styles["fieldimage"]} src={`img/${(field as Transport).image}`} />
+                                    {playingState.ownership[field.id] !== undefined && (
+                                        <div
+                                            className={styles["property-owner"]}
+                                            style={{ backgroundColor: playingState.players.find(player => player.id === playingState.ownership[field.id])?.color }}
                                         >
                                             <div>
                                                 {playingState.players.find(player => player.id === playingState.ownership[field.id])?.id
@@ -311,7 +311,7 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
                                     {playingState.ownership[field.id] !== undefined && (
                                         <div
                                             className={styles["property-owner"]}
-                                            style={{ backgroundColor: "red" }}
+                                            style={{ backgroundColor: playingState.players.find(player => player.id === playingState.ownership[field.id])?.color }}
                                         >
                                             <div>
                                                 {playingState.players.find(player => player.id === playingState.ownership[field.id])?.id
@@ -329,15 +329,16 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
                                     <p>Anti-monopolní úřad</p>
                                 </>
                             )}
-                            {playingState.players.map((player, playerIndex) => (
-                                player.position === field.id && (
+                            {playingState.players
+                                .filter(player => !player.isBankrupt)
+                                .map((player, playerIndex) => (
+                                    player.position === field.id && (
                                     <div
                                         key={playerIndex}
-                                        className={styles["player"]}
-                                        style={{ backgroundColor: "blue" }}
+                                        className={`${styles["player"]} ${styles[player.color.toLowerCase()]}`}
                                     ></div>
-                                )
-                            ))}
+                                    )
+                                ))}
                             {field.type === "GO_JAIL" && (
                                 <>
                                   <p>Jdi do vězení</p>
