@@ -10,7 +10,7 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
     const [showSellPropertyDialog, setShowSellPropertyDialog] = useState<boolean>(false);
     const [hoveredFieldId, setHoveredFieldId] = useState<number | null>(null);
     const [showBuyHouseDialog, setShowBuyHouseDialog] = useState<boolean>(false);
-    const [selectedPropertyForHouse] = useState<Number>(0);
+    const [selectedPropertyForHouse] = useState<number>(0);
     const [, setChanceCardMessage] = useState<string>('');
 
     const handleMouseEnter = (fieldId: number) => {
@@ -263,6 +263,7 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
                                         >
                                             <div>
                                                 {`HRÁČ ${playingState.players.find(player => player.id === playingState.ownership[field.id])?.id}`}
+                                                <p>   </p>
                                             </div>
                                         </div>
                                     )}
