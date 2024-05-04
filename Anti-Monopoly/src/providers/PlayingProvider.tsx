@@ -1,5 +1,5 @@
 import React, { PropsWithChildren, createContext, useReducer } from 'react';
-import { Field, PlayingPlayer, Player, GameState, cities, Role, FieldType, Start, Tax, Jail, Pay, ChanceCard, Property, Transport, AntiMonopolyOffice, Energy, GoJail} from '../types/type';
+import { Field, PlayingPlayer, Player, GameState, cities, Role, FieldType, Start, Jail, Pay, ChanceCard, Property, Transport, AntiMonopolyOffice, Energy, GoJail} from '../types/type';
 
 // Definování políček. 
 const initialFields: Field[] = [
@@ -7,21 +7,21 @@ const initialFields: Field[] = [
   { type: FieldType.PROPERTY, cityid: 100, name: "Corso Impero", price: 60, rent: 6, houses: 0, id: 2 } as Property,
   { type: FieldType.CHANCE_CARD, id: 3 } as ChanceCard,
   { type: FieldType.PROPERTY, name: "Via Roma", cityid: 100, price: 60, rent: 60, houses: 0, id: 4 } as Property,
-  { type: FieldType.TAX, percentage: 20, money: 100, id: 5 } as Tax,
+  { type: FieldType.PAY, classicMoney: 60, id: 5 }as Pay,
   { type: FieldType.TRANSPORT, name: "Letecká doprava", price: 200, rent: 20, id: 6, image: "Airplane.svg" } as Transport,
   { type: FieldType.PROPERTY, name: "Alexanderplatz", cityid: 101, price: 100, rent: 20, houses: 0, id: 7 } as Property,
   { type: FieldType.CHANCE_CARD, id: 8 } as ChanceCard,
   { type: FieldType.PROPERTY, cityid: 101, name: "Kurfürstendamm", price: 100, rent: 10, houses: 0, id: 9 } as Property,
   { type: FieldType.PROPERTY, cityid: 101, name: "Potsdammer StraSe", price: 120, rent: 12, houses: 0, id: 10 } as Property,
   { type: FieldType.JAIL, id: 11 } as Jail,
-  { type: FieldType.PROPERTY, name: "Syntagma", cityid: 107, price: 400, rent: 40, houses: 0, id: 40 } as Property,
+  { type: FieldType.PROPERTY, name: "Syntagma", cityid: 102, price: 400, rent: 40, houses: 0, id: 40 } as Property,
   { type: FieldType.PROPERTY, name: "Plaza Mayor", cityid: 103, price: 140, rent: 14, houses: 0, id: 12 } as Property,
-  { type: FieldType.PAY, classicMoney: 75, id: 39 } as Pay,
+  { type: FieldType.PAY, classicMoney: 100, id: 39 } as Pay,
   { type: FieldType.ENERGY, name: "Elektrárna", id: 13, price: 200 } as Energy,
-  { type: FieldType.PROPERTY, name: "La Plaka", cityid: 107, price: 350, rent: 35, houses: 0, id: 38 } as Property,
+  { type: FieldType.PROPERTY, name: "La Plaka", cityid: 102, price: 350, rent: 35, houses: 0, id: 38 } as Property,
   { type: FieldType.PROPERTY, name: "Gran Via", cityid: 103, price: 140, rent: 14, houses: 0, id: 14 } as Property,
   { type: FieldType.CHANCE_CARD, id: 37 } as ChanceCard,
-  { type: FieldType.PROPERTY, name: "Paseo de la Castellana", cityid: 103, price: 160, rent: 16, houses: 0, id: 15 } as Property,
+  { type: FieldType.PROPERTY, name: "Paseo", cityid: 103, price: 160, rent: 16, houses: 0, id: 15 } as Property,
   { type: FieldType.TRANSPORT, name: "Autobusová doprava", price: 200, rent: 20, id: 36, image: "Bus.svg"} as Transport,
   { type: FieldType.TRANSPORT, name: "Tramvajová doprava", price: 200, rent: 20, id: 16, image: "Tramvaj.svg"} as Transport,
   { type: FieldType.PROPERTY, name: "Oxford Street", cityid: 104, price: 320, rent: 32, houses: 0, id: 35 } as Property,

@@ -2,8 +2,9 @@ import { useContext, useEffect, useState } from "react";
 import styles from './Board.module.css';
 import Dice from "react-dice-roll";
 import { PlayingContext } from "../../providers/PlayingProvider";
-import { Property, Start, Transport, cities, Tax, Pay, Energy } from "../../types/type";
+import { Property, Start, Transport, cities, Pay, Energy } from "../../types/type";
 import WindowsStats from "./WindowStats";
+
 const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: number, setCurrentPlayerId: (id: number) => void }) => {
     const [playingState, playingDispatch] = useContext(PlayingContext);
     const [showBuyPropertyDialog, setShowBuyPropertyDialog] = useState<boolean>(false);
@@ -240,6 +241,25 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
         setCurrentPlayerId((currentPlayerId % playingState.players.length) + 1);
     };
 
+    const PropertyComponent = ({ field }: { field: Property }) => {
+        field as Property;
+        const getColor = (cityId: number) => {
+            const city = cities.find(city => city.id === cityId);
+            return city ? city.color : 'default';
+        };
+    
+        const colorClass = getColor(field.cityid);
+    
+        return (
+            <>
+            <p className={`${styles["Property--city"]} ${styles[colorClass.toLowerCase()]}`}>
+                {field.name}
+            </p>
+            <p>{field.price}</p>
+            </>
+        );
+    };
+
     return (
         <>
             <div className={styles["playing--zone"]}>
@@ -254,25 +274,44 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
                         >
                             {field.type === "PROPERTY" && (
                                 <div>
-                                    <div>{(field as Property).name}</div>
-
-                                    {playingState.ownership[field.id] !== undefined && (
+                                    <PropertyComponent field={field as Property} />
+                                    {playingState.ownership[field.id] === undefined ? (
+                                        <p className={styles["property-owner"]}>Nikdo</p>
+                                    ) : (
                                         <div
                                             className={styles["property-owner"]}
                                             style={{ backgroundColor: playingState.players.find(player => player.id === playingState.ownership[field.id])?.color }}
                                         >
-                                            <div>
-                                                {`HRÁČ ${playingState.players.find(player => player.id === playingState.ownership[field.id])?.id}`}
-                                                <p>   </p>
-                                            </div>
+                                            <p>{`HRÁČ ${playingState.players.find(player => player.id === playingState.ownership[field.id])?.id}`}</p>
                                         </div>
                                     )}
-                                    {field.type === "PROPERTY" && <div>{(field as Property).price}</div>}
                                 </div>
                             )}
 
+                            {field.type === "CHANCE_CARD" && (
+                                <img className={styles["fieldimage"]} src="img/changecard.svg"></img>)}
+                                
+
+                            {field.type === "PAY" && (
+                                <>
+                                <p>Zaplať {(field as Pay).classicMoney}</p>
+                                <img className={styles["fieldimage"]} src="img/taxes.svg"></img>
+                                </>
+                            )}
+
+                            {field.type === "JAIL" && (
+                                <img className={styles["fieldimage"]} src="img/jail.svg"></img>
+                            )}
+
+                            {field.type === "START" && (
+                                <>
+                                    <p>Start</p>
+                                    <p>Dostaneš {(field as Start).money}</p>
+                                </>
+                            )}
+
                             {field.type === "TRANSPORT" && (
-                                <div>
+                                <>
                                     <img className={styles["fieldimage"]} src={`img/${(field as Transport).image}`} />
                                     {playingState.ownership[field.id] !== undefined && (
                                         <div
@@ -286,48 +325,33 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
                                             </div>
                                         </div>
                                     )}
-                                
-                                </div>
-                            )}
-                            {field.type === "CHANCE_CARD" && (
-                                <img className={styles["fieldimage"]} src="img/changecard.svg"></img>)}
-                            {field.type === "PAY" && (
-                                <p>Zaplať {(field as Pay).classicMoney}</p>
-                            )}
-                            {field.type === "TAX" && (
-                                <p>Daně {(field as Tax).money}</p>
-                            )}
-                            {field.type === "JAIL" && (
-                                <img className={styles["fieldimage"]} src="img/jail.svg"></img>
-                            )}
-                            {field.type === "START" && (
-                                <>
-                                    <p>Start</p>
-                                    <p>Dostaneš {(field as Start).money}</p>
+                                    {playingState.ownership[field.id] === undefined && (
+                                        <div className={styles["property-owner"]}>Nikdo</div>
+                                    )}
                                 </>
                             )}
-
                             {field.type === "ENERGY" && (
-                                <div>
-                                    {playingState.ownership[field.id] !== undefined && (
+                                <>
+                                <img className={styles["fieldimage"]} src={`img/${(field as Energy).name}.svg`} alt={(field as Energy).name}/>
+                                    {playingState.ownership[field.id] === undefined ? (
+                                        <p className={styles["property-owner"]}>Nikdo</p>
+                                    ) : (
                                         <div
                                             className={styles["property-owner"]}
                                             style={{ backgroundColor: playingState.players.find(player => player.id === playingState.ownership[field.id])?.color }}
                                         >
-                                            <div>
-                                                {playingState.players.find(player => player.id === playingState.ownership[field.id])?.id
-                                                    ? `HRÁČ ${playingState.players.find(player => player.id === playingState.ownership[field.id])?.id}`
-                                                    : ''}
-                                            </div>
+                                            <p>
+                                                {`HRÁČ ${playingState.players.find(player => player.id === playingState.ownership[field.id])?.id}`}
+                                            </p>
                                         </div>
                                     )}
-                                        <img  className={styles["fieldimage"]} src={`img/${(field as Energy).name}.svg`} alt={(field as Energy).name}/>
-                                </div>
+                                </>
                             )}
 
                             {field.type === "ANTI_MONOPOLY_OFFICE" && (
                                 <>
                                     <p>Anti-monopolní úřad</p>
+                                    <img className={styles["fieldimage"]} src="img/antimonopol.svg"></img>
                                 </>
                             )}
                             <div className={styles["gridplayers"]}>
@@ -345,11 +369,11 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
                             {field.type === "GO_JAIL" && (
                                 <>
                                   <p>Jdi do vězení</p>
+                                  <img className={styles["fieldimage"]} src="img/pouta.svg"></img>
                               </>
                             )}
                         </div>
                     ))}
-
                     <div className={styles["blank_field"]}>
                         <WindowsStats currentPlayerId={currentPlayerId} />
                     </div>

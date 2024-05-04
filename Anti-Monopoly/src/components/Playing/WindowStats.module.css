@@ -1,6 +1,8 @@
 .current-player{
     display: flex;
     text-align: center;
+    gap: 0.5em;
+    margin: 0.5em;
 }
 
 .imground{

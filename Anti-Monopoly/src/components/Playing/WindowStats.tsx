@@ -33,7 +33,7 @@ const WindowsStats = ({ currentPlayerId }: { currentPlayerId: number }) => {
                 {currentPlayer && (
                     <div className={styles["current-player--stats"]} >
                         <img className={styles["imground"]} src={getImageForRole(currentPlayer.role)} alt={currentPlayer.role} />
-                        <h2>Hráč {currentPlayer.id}</h2>
+                        <h2>Hráč <span style={{ color: currentPlayer.color }}>{currentPlayer.id}</span></h2>
                         <h3>Finance</h3>
                         <p>{currentPlayer.money}</p>
                         <h3>Pozice</h3>
@@ -43,7 +43,7 @@ const WindowsStats = ({ currentPlayerId }: { currentPlayerId: number }) => {
                 {sortedPlayers.filter(player => player.id !== currentPlayerId).map(player => (
                     <div key={player.id} className={styles["player--stats"]}>
                         <img className={styles["imground"]} src={getImageForRole(player.role)} alt={player.role} />
-                        <h2>Hráč {player.id}</h2>
+                        <h2>Hráč <span style={{ color: player.color }}>{player.id}</span></h2>
                     </div>
                 ))}
             </div>
