@@ -171,19 +171,8 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
     };
 
     const movePlayer = (playerId: number, rollValue: number) => {
-        console.log(playerId);
         const currentPlayer = playingState.players.find(player => player.id === playerId);
         if (!currentPlayer) return;
-    
-        if (currentPlayer.isJailed === true && currentPlayer.isJailedNumberOfAttempts < 3) {
-            if (rollValue === 6) {
-                playingDispatch({ type: 'LEAVE_JAIL', playerId });
-            } else {
-                playingDispatch({ type: 'INCREASE_JAIL_ATTEMPTS', playerId });
-                setShowJailDialog(true);
-                return;
-            }
-        }
     
         const currentPositionId = currentPlayer.position;
         const newPositionId = ((currentPositionId - 1 + rollValue) % fields.length) + 1;
@@ -195,25 +184,27 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
             if (playingState.ownership[landedField.id] === undefined) {
                 const propertyPrice = (landedField as Property).price;
                 if ((currentPlayer.money ?? 0) >= propertyPrice) {
-                    
                     setShowBuyPropertyDialog(true);
-                }
-                else{
+                } else {
                     checkFinancialStatus(currentPlayer);
                 }
-            }
-            else{
+            } else if (playingState.ownership[landedField.id] === playerId) {
+                const propertyCity = cities.find(c => c.id === (landedField as Property).cityid);
+                const propertiesInCity = fields.filter(f => f.type === "PROPERTY" && (f as Property).cityid === propertyCity?.id);
+                const ownedPropertiesInCity = propertiesInCity.filter(p => playingState.ownership[p.id] === playerId);
+                if (ownedPropertiesInCity.length === propertiesInCity.length) {
+                    if ((landedField as Property).houses < 6) {
+                        setShowBuyHouseDialog(true);
+                    }
+                } else {
+                    checkFinancialStatus(currentPlayer);
+                }
+            } else {
                 checkFinancialStatus(currentPlayer);
             }
         }
-         else if (landedField && landedField.type === "CHANCE_CARD") {
-            playingDispatch({ type: 'CHANCE_CARD', playerId });
-            checkFinancialStatus(currentPlayer);
-        }
-        else{
-            checkFinancialStatus(currentPlayer);
-        }
     };
+    
     
     const moveNextNonBankruptPlayer = (currentPlayerId: number) => {
         let nextPlayerId = (currentPlayerId % playingState.players.length) + 1;
