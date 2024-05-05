@@ -276,15 +276,10 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
             } else {
                 currentPlayer.isBankrupt = true;
                 alert(`Hráč: ${currentPlayer.id} je v bankrotu a to znamená konec hry pro něj`);
-                setTimeout(() => {
                     const nonBankruptPlayers = playingState.players.filter(player => !player.isBankrupt);
-                    console.log("konec")
-                    console.log(nonBankruptPlayers)
-                    console.log(nonBankruptPlayers.length)
                     if (nonBankruptPlayers.length === 1) {
                         navigate('/winning', { state: { PlayingPlayer: nonBankruptPlayers[0] } });
                     }
-                }, 100);
             }
         } else {
             setShowSellPropertyDialog(false);

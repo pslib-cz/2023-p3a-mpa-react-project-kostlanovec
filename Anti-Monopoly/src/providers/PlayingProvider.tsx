@@ -361,41 +361,28 @@ const playingReducer = (state: GameState, action: Action): GameState => {
     }
 
     case 'SELL_PROPERTY': {
-      console.log('Updating ownership for field', action.fieldId);
       const updatedOwnership = { ...state.ownership };
       delete updatedOwnership[action.fieldId];
-  
-      return {
-          ...state,
-          ownership: updatedOwnership,
-          players: state.players.map(p =>
-              p.id === action.playerId
-              ? { ...p, money: p.money + action.price }
-              : p
-          ),
-      };
-  }
-  
-
-    case "SELL_HOUSES": {
+    
       const fieldIndex = state.fields.findIndex(field => field.id === action.fieldId);
-      const playerIndex = state.players.findIndex(player => player.id === action.playerId);
-      if (fieldIndex !== -1 && playerIndex !== -1) {
-      const field = state.fields[fieldIndex] as Property;
-      const player = state.players[playerIndex];
-      const housePrice = field.type === "PROPERTY" ? cities.find(city => city.id === field.id)?.pricehouse : undefined;
-      const totalCost = (housePrice || 0) * action.houseCount;
-
-      if (field.type === "PROPERTY" && field.houses >= action.houseCount) {
-        field.houses -= action.houseCount;
-        player.money += totalCost;
-
+      if (fieldIndex !== -1) {
+        const field = state.fields[fieldIndex] as Property;
+        field.houses = 0; 
+    
         return {
-        ...state,
-        fields: [...state.fields.slice(0, fieldIndex), field, ...state.fields.slice(fieldIndex + 1)],
-        players: [...state.players.slice(0, playerIndex), player, ...state.players.slice(playerIndex + 1)],
+            ...state,
+            ownership: updatedOwnership,
+            fields: [
+              ...state.fields.slice(0, fieldIndex),
+              field,
+              ...state.fields.slice(fieldIndex + 1)
+            ],
+            players: state.players.map(p =>
+                p.id === action.playerId
+                ? { ...p, money: p.money + action.price }
+                : p
+            ),
         };
-      }
       }
       return state;
     }
@@ -476,7 +463,7 @@ const playingReducer = (state: GameState, action: Action): GameState => {
         };
       }
       return state;
-      
+
     default:
       return state;
   }
