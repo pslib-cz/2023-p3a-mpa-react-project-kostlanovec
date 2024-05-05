@@ -59,7 +59,9 @@ type Action =
   | { type: "SELL_HOUSES"; playerId: number; fieldId: number; houseCount: number }
   | { type: "ADD_PLAYER" }
   | { type: "REMOVE_PLAYER"; payload: number }
-  | { type: "TOGGLE_ROLE"; payload: number };
+  | { type: "TOGGLE_ROLE"; payload: number }
+  | { type: "LEAVE_JAIL"; playerId: number }
+  | { type: "PAY_JAIL_FEE"; playerId: number };
 
 const initialState: GameState = {
   players: [
@@ -95,7 +97,6 @@ const playingReducer = (state: GameState, action: Action): GameState => {
       if (playerMoving) {
       const newPositionId = action.newPositionId;
 
-      // políčko jdi do vězení
       if (newPositionId === 31) {
           return {
               ...state,
@@ -178,7 +179,6 @@ const playingReducer = (state: GameState, action: Action): GameState => {
           }
 
         case "TRANSPORT": {
-          console.log("TRANSPORT");
           const transportOwner = state.ownership[newPositionId];
           if (transportOwner && transportOwner !== action.playerId) {
           const transportPropertiesOwned = Object.keys(state.ownership).filter(
@@ -301,16 +301,6 @@ const playingReducer = (state: GameState, action: Action): GameState => {
       return state;
 
     case 'BUY_PROPERTY':
-      console.log(action, state);
-      console.log({
-        ...state,
-        ownership: { ...state.ownership, [action.fieldId]: action.playerId },
-        players: state.players.map(p =>
-          p.id === action.playerId
-            ? { ...p, money: p.money - action.price }
-            : p
-        ),
-      });
         return {
           ...state,
           ownership: { ...state.ownership, [action.fieldId]: action.playerId },
@@ -433,7 +423,6 @@ const playingReducer = (state: GameState, action: Action): GameState => {
       return state;
 
     case "TOGGLE_ROLE":
-      console.log("změna role")
       return {
         ...state,
         players: state.players.map(player =>
@@ -442,6 +431,35 @@ const playingReducer = (state: GameState, action: Action): GameState => {
             : player
         ),
       };
+
+
+      case "LEAVE_JAIL":
+        const updatedPlayers = state.players.map(player => {
+          if (player.id === action.playerId) {
+            return { ...player, isJailed: false, isJailedNumberOfAttempts: 0 };
+          }
+          return player;
+        });
+      
+        return { ...state, players: updatedPlayers };
+
+
+    case "PAY_JAIL_FEE":
+      const player = state.players.find(p => p.id === (action as { playerId: number }).playerId);
+      if (player) {
+        player.money -= 50;
+        return {
+          ...state,
+          players: state.players.map(p =>
+            p.id === (action as { playerId: number }).playerId
+              ? { ...p, money: player.money }
+              : p
+          ),
+        };
+      }
+      return state;
+
+
     case 'DECLARE_BANKRUPTCY':
       const updatedOwnership = { ...state.ownership };
       Object.keys(updatedOwnership).forEach(y => {

@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import styles from './Board.module.css';
 import Dice from "react-dice-roll";
 import { PlayingContext } from "../../providers/PlayingProvider";
-import { Property, Start, Transport, cities, Pay, Energy } from "../../types/type";
+import { Property, Start, Transport, cities, Pay, Energy, PlayingPlayer } from "../../types/type";
 import WindowsStats from "./WindowStats";
 
 const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: number, setCurrentPlayerId: (id: number) => void }) => {
@@ -13,6 +13,8 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
     const [showBuyHouseDialog, setShowBuyHouseDialog] = useState<boolean>(false);
     const [selectedPropertyForHouse] = useState<number>(0);
     const [, setChanceCardMessage] = useState<string>('');
+    const [showJailDialog, setShowJailDialog] = useState<boolean>(false);
+
 
     const handleMouseEnter = (fieldId: number) => {
         setHoveredFieldId(fieldId);
@@ -115,12 +117,6 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
     };
 
     const { fields } = playingState;
-    useEffect(() => {
-        const currentPlayer = playingState.players.find(player => player.id === currentPlayerId);
-        if (currentPlayer && !currentPlayer.isBankrupt) {
-            checkFinancialStatus(currentPlayerId);
-        }
-    }, [currentPlayerId, playingState.players, playingState.ownership, fields]);
 
     useEffect(() => {
         if (playingState.chanceCardMessage) {
@@ -130,34 +126,60 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
     }, [playingState.chanceCardMessage]);
 
     const handleDiceRoll = (value: number) => {
-        movePlayer(currentPlayerId, value);
+        if (showJailDialog) {
+            if (value === 6) {
+                playingDispatch({ type: 'LEAVE_JAIL', playerId: currentPlayerId });
+                movePlayer(currentPlayerId, value);
+            }
+            setShowJailDialog(false);
+        } else {
+            movePlayer(currentPlayerId, value);
+        }
     };
 
     const movePlayer = (playerId: number, rollValue: number) => {
+        console.log(playerId);
         const currentPlayer = playingState.players.find(player => player.id === playerId);
         if (!currentPlayer) return;
+    
+        if (currentPlayer.isJailed === true && currentPlayer.isJailedNumberOfAttempts < 3) {
+            if (rollValue === 6) {
+                playingDispatch({ type: 'LEAVE_JAIL', playerId });
+            } else {
+                setShowJailDialog(true);
+                return;
+            }
+        }
+    
         const currentPositionId = currentPlayer.position;
         const newPositionId = ((currentPositionId - 1 + rollValue) % fields.length) + 1;
     
         const landedField = fields.find(field => field.id === newPositionId);
         playingDispatch({ type: 'MOVE_PLAYER', playerId, newPositionId: newPositionId, diceRoll: rollValue });
+    
         if (landedField && (landedField.type === "PROPERTY" || landedField.type === "TRANSPORT" || landedField.type === "ENERGY")) {
             if (playingState.ownership[landedField.id] === undefined) {
                 const propertyPrice = (landedField as Property).price;
                 if ((currentPlayer.money ?? 0) >= propertyPrice) {
+                    
                     setShowBuyPropertyDialog(true);
-                } else {
-                    moveNextNonBankruptPlayer(playerId);
                 }
-            } else {
-                moveNextNonBankruptPlayer(playerId);
+                else{
+                    checkFinancialStatus(currentPlayer);
+                }
             }
-        } else if (landedField && landedField.type === "CHANCE_CARD") {
-            playingDispatch({ type: 'CHANCE_CARD', playerId });
-            moveNextNonBankruptPlayer(playerId);
-        } else {
-            moveNextNonBankruptPlayer(playerId);
+            else{
+                moveNextNonBankruptPlayer(currentPlayerId);
+            }
         }
+         else if (landedField && landedField.type === "CHANCE_CARD") {
+            playingDispatch({ type: 'CHANCE_CARD', playerId });
+            checkFinancialStatus(currentPlayer);
+        }
+        else{
+            checkFinancialStatus(currentPlayer);
+        }
+
     };
     
     const moveNextNonBankruptPlayer = (currentPlayerId: number) => {
@@ -181,8 +203,8 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
                     price: propertyPrice
                 });
             }
-            moveNextNonBankruptPlayer(currentPlayerId);
         }
+        moveNextNonBankruptPlayer(currentPlayerId);
         setShowBuyPropertyDialog(false);
     };
 
@@ -195,10 +217,9 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
         setShowSellPropertyDialog(false);
     };
 
-    const checkFinancialStatus = (playerId: number) => {
-        const currentPlayer = playingState.players.find(player => player.id === playerId);
+    const checkFinancialStatus = (currentPlayer: PlayingPlayer) => {
         if (currentPlayer && currentPlayer.money < 0) {
-            const propertiesOwned = findPropertiesOwnedByPlayer(playerId);
+            const propertiesOwned = findPropertiesOwnedByPlayer(currentPlayer.id);
             if (propertiesOwned.length > 0) {
                 const totalValueOfProperties = propertiesOwned.reduce((acc, property) => {
                     if (property.type === "PROPERTY" || property.type === "TRANSPORT" || property.type === "ENERGY") {
@@ -210,11 +231,14 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
                 if (totalValueOfProperties + currentPlayer.money >= 0) {
                     setShowSellPropertyDialog(true);
                 } else {
-                    handleBankruptcy(playerId);
+                    handleBankruptcy(currentPlayer.id);
                 }
             } else {
-                handleBankruptcy(playerId);
+                handleBankruptcy(currentPlayer.id);
             }
+        }
+        else{
+            moveNextNonBankruptPlayer(currentPlayer.id);
         }
     };
 
@@ -242,6 +266,19 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
         setCurrentPlayerId((currentPlayerId % playingState.players.length) + 1);
     };
 
+    const handleJailDecision = (pay: boolean) => {
+        if (pay) {
+            playingDispatch({
+                type: 'PAY_JAIL_FEE',
+                playerId: currentPlayerId
+            });
+            playingDispatch({ type: 'LEAVE_JAIL', playerId: currentPlayerId });
+        } else {
+            setShowJailDialog(false);
+        }
+        setShowJailDialog(false);
+    };
+    
     const PropertyComponent = ({ field }: { field: Property }) => {
         field as Property;
         const getColor = (cityId: number) => {
@@ -415,6 +452,18 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
                             </div>
                         </div>
                     )}
+                    {showJailDialog && (
+                        <div className={styles.overlay}>
+                            <div className={styles.modal}>
+                                <h2>Opustit vězení</h2>
+                                <p>Máte možnosti:</p>
+                                <p>Zaplatit 100 a okamžitě odejít, nebo pokusit se hodit 6 a zůstat bez platby. Pokud hodíte 6, můžete znovu hodit kostkou.</p>
+                                <button onClick={() => handleJailDecision(true)}>Zaplatit 100</button>
+                                <button onClick={() => handleJailDecision(false)}>Hodit kostkou</button>
+                            </div>
+                        </div>
+                    )}
+
                 </div>
                 <div className={styles["dices"]}>
                     <Dice size={100} onRoll={handleDiceRoll} />
