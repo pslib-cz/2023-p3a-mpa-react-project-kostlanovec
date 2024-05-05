@@ -154,6 +154,7 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
             }
         } else if (landedField && landedField.type === "CHANCE_CARD") {
             playingDispatch({ type: 'CHANCE_CARD', playerId });
+            moveNextNonBankruptPlayer(playerId);
         } else {
             moveNextNonBankruptPlayer(playerId);
         }

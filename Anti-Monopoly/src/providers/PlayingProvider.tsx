@@ -64,8 +64,7 @@ type Action =
 const initialState: GameState = {
   players: [
     { id: 1, money: 2000, role: Role.MONOPOLIST, position: 1, isBankrupt: false, isJailed: false, color: "red", isJailedNumberOfAttempts: 0},
-    { id: 2, money: 2000, role: Role.CONCURENT, position: 1, isBankrupt: true, isJailed: false, color: "blue", isJailedNumberOfAttempts: 0},
-    { id: 3, money: 2000, role: Role.CONCURENT, position: 1, isBankrupt: false, isJailed: false, color: "yellow", isJailedNumberOfAttempts: 0},
+    { id: 2, money: 2000, role: Role.CONCURENT, position: 1, isBankrupt: false, isJailed: false, color: "blue", isJailedNumberOfAttempts: 0},
   ],
   isPlayingPlayerid: 1,
   fields: initialFields,
@@ -417,7 +416,7 @@ const playingReducer = (state: GameState, action: Action): GameState => {
           id: state.players.length + 1,
           role: Role.CONCURENT,
           money: 2000,
-          position: 0,
+          position: 1,
           isBankrupt: false,
           isJailed: false,
           color: randomColor,
