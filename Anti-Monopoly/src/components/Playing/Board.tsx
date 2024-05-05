@@ -430,15 +430,15 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
                             <div className={styles.modal}>
                                 <h2>Sell Property</h2>
                                 {findPropertiesOwnedByPlayer(currentPlayerId).map((property, index) => (
-                                    <div key={index}>
-                                        {property.type === "PROPERTY" && (
-                                            <>
-                                                <p>{(property as Property).name} - Sell for {(property as Property).price}</p>
-                                                <button onClick={() => handleSellProperty(currentPlayerId, index, (property as Property).price)}>Sell</button>
-                                            </>
-                                        )}
-                                    </div>
-                                ))}
+                                <div key={index}>
+                                    {property.type === "PROPERTY" && (
+                                        <>
+                                            <p>{(property as Property).name} - Sell for {(property as Property).price}</p>
+                                            <button onClick={() => handleSellProperty(currentPlayerId, property.id, (property as Property).price)}>Sell</button>
+                                        </>
+                                    )}
+                                </div>
+                            ))}
                                 <button onClick={() => setShowSellPropertyDialog(false)}>Cancel</button>
                             </div>
                         </div>

@@ -167,3 +167,9 @@ p{
 .orange{
     background-color: orange;
 }
+
+.house--number{
+    position: absolute;
+    bottom: 0;
+    right: 0;
+}

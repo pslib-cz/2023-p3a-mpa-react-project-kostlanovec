@@ -361,19 +361,21 @@ const playingReducer = (state: GameState, action: Action): GameState => {
     }
 
     case 'SELL_PROPERTY': {
+      console.log('Updating ownership for field', action.fieldId);
       const updatedOwnership = { ...state.ownership };
       delete updatedOwnership[action.fieldId];
-      
+  
       return {
-      ...state,
-      ownership: updatedOwnership,
-      players: state.players.map(p =>
-        p.id === action.playerId
-        ? { ...p, money: p.money + action.price }
-        : p
-      ),
+          ...state,
+          ownership: updatedOwnership,
+          players: state.players.map(p =>
+              p.id === action.playerId
+              ? { ...p, money: p.money + action.price }
+              : p
+          ),
       };
-    }
+  }
+  
 
     case "SELL_HOUSES": {
       const fieldIndex = state.fields.findIndex(field => field.id === action.fieldId);
