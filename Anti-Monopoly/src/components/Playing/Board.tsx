@@ -1,6 +1,7 @@
 import { useContext, useEffect, useState } from "react";
 import styles from './Board.module.css';
 import Dice from "react-dice-roll";
+import { useNavigate } from "react-router-dom";
 import { PlayingContext } from "../../providers/PlayingProvider";
 import { Property, Start, Transport, cities, Pay, Energy, PlayingPlayer } from "../../types/type";
 import WindowsStats from "./WindowStats";
@@ -14,7 +15,35 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
     const [selectedPropertyForHouse] = useState<number>(0);
     const [, setChanceCardMessage] = useState<string>('');
     const [showJailDialog, setShowJailDialog] = useState<boolean>(false);
+    const [selectedPropertiesForSale, setSelectedPropertiesForSale] = useState<{ [key: number]: boolean }>({});
+    const [totalNeeded, setTotalNeeded] = useState<number>(0);
+    const navigate = useNavigate();
 
+    const handleToggleProperty = (fieldId: number) => {
+        setSelectedPropertiesForSale(prev => ({
+            ...prev,
+            [fieldId]: !prev[fieldId]
+        }));
+    };
+    
+    const handleSellSelectedProperties = () => {
+        const currentPlayer = playingState.players.find(player => player.id === currentPlayerId);
+        if (!currentPlayer) return;
+
+        let accumulated = 0;
+        findPropertiesOwnedByPlayer(currentPlayerId).forEach((property) => {
+            if (selectedPropertiesForSale[property.id]) {
+                accumulated += (property as Property).price / 2;
+                handleSellProperty(currentPlayerId, property.id, (property as Property).price);
+            }
+        });
+
+        const newTotalNeeded = totalNeeded - accumulated;
+        setTotalNeeded(newTotalNeeded);
+        if (newTotalNeeded <= 0) {
+            setShowSellPropertyDialog(false);
+        }
+    };
 
     const handleMouseEnter = (fieldId: number) => {
         setHoveredFieldId(fieldId);
@@ -174,7 +203,7 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
                 }
             }
             else{
-                moveNextNonBankruptPlayer(currentPlayerId);
+                checkFinancialStatus(currentPlayer);
             }
         }
          else if (landedField && landedField.type === "CHANCE_CARD") {
@@ -184,7 +213,6 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
         else{
             checkFinancialStatus(currentPlayer);
         }
-
     };
     
     const moveNextNonBankruptPlayer = (currentPlayerId: number) => {
@@ -214,7 +242,7 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
     };
 
     const findPropertiesOwnedByPlayer = (playerId: number) => {
-        return fields.filter((_, index) => playingState.ownership[index] === playerId);
+        return fields.filter(field => playingState.ownership[field.id] === playerId && (field.type === "PROPERTY" || field.type === "ENERGY" || field.type === "TRANSPORT"));
     };
 
     const handleSellProperty = (playerId: number, fieldId: number, price: number) => {
@@ -232,29 +260,36 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
     };
 
     const checkFinancialStatus = (currentPlayer: PlayingPlayer) => {
-        if (currentPlayer && currentPlayer.money < 0) {
+        if (!currentPlayer) return;
+    
+        const debt = currentPlayer.money < 0 ? -currentPlayer.money : 0;
+    
+        if (debt > 0) {
             const propertiesOwned = findPropertiesOwnedByPlayer(currentPlayer.id);
             const totalValueOfProperties = propertiesOwned.reduce((acc, property) => {
-                const propertyPrice = (property as Property).price / 2;
-                return acc + propertyPrice;
+                return acc + (property as Property).price / 2;
             }, 0);
     
-            if (totalValueOfProperties + currentPlayer.money >= 0) {
-                setShowSellPropertyDialog(false);
-                moveNextNonBankruptPlayer(currentPlayer.id);
-            } else {
+            if (totalValueOfProperties >= debt) {
+                setTotalNeeded(debt);
                 setShowSellPropertyDialog(true);
+            } else {
+                currentPlayer.isBankrupt = true;
+                alert(`Hráč: ${currentPlayer.id} je v bankrotu a to znamená konec hry pro něj`);
+                setTimeout(() => {
+                    const nonBankruptPlayers = playingState.players.filter(player => !player.isBankrupt);
+                    console.log("konec")
+                    console.log(nonBankruptPlayers)
+                    console.log(nonBankruptPlayers.length)
+                    if (nonBankruptPlayers.length === 1) {
+                        navigate('/winning', { state: { PlayingPlayer: nonBankruptPlayers[0] } });
+                    }
+                }, 100);
             }
         } else {
-            setShowSellPropertyDialog(false); 
+            setShowSellPropertyDialog(false);
             moveNextNonBankruptPlayer(currentPlayer.id);
         }
-    };
-
-    const handleBankruptcy = (playerId: number) => {
-        playingDispatch({ type: "DECLARE_BANKRUPTCY", playerId });
-        alert(`Hráč: ${playerId} je v bankrotu a to znamená konec hry pro něj`);
-        setCurrentPlayerId((playerId % playingState.players.length) + 1);
     };
 
     const handleBuyHouse = (fieldId: number) => {
@@ -439,24 +474,30 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
                             </div>
                         </div>
                     )}
-                    {showSellPropertyDialog && (
-                        <div className={styles.overlay}>
-                            <div className={styles.modal}>
-                                <h2>Sell Property</h2>
-                                {findPropertiesOwnedByPlayer(currentPlayerId).map((property, index) => (
+                   {showSellPropertyDialog && (
+                    <div className={styles.overlay}>
+                        <div className={styles.modal}>
+                            <h2>Sell Property</h2>
+                            {findPropertiesOwnedByPlayer(currentPlayerId).map((field, index) => (
                                 <div key={index}>
-                                    {property.type === "PROPERTY" && (
-                                        <>
-                                            <p>{(property as Property).name} - Sell for {Math.floor((property as Property).price / 2)}</p>
-                                            <button onClick={() => handleSellProperty(currentPlayerId, property.id, (property as Property).price)}>Sell</button>
-                                        </>
-                                    )}
+                                    <input
+                                        type="checkbox"
+                                        checked={selectedPropertiesForSale[field.id] || false}
+                                        onChange={() => handleToggleProperty(field.id)}
+                                    />
+                                    <p>{(field as Property).name} - Sell for {Math.floor((field as Property).price / 2)}</p>
                                 </div>
-                                ))}
-                                <p>You need to raise: {Math.abs(playingState.players.find(player => player.id === currentPlayerId)?.money ?? 0)} more</p>
-                            </div>
+                            ))}
+                            <p>You need to raise: {Math.abs(playingState.players.find(player => player.id === currentPlayerId)?.money ?? 0)} more</p>
+                            <button 
+                                onClick={handleSellSelectedProperties}
+                                disabled={!Object.keys(selectedPropertiesForSale).some(id => selectedPropertiesForSale[Number(id)])}
+                            >
+                                Sell Selected Properties
+                            </button>
                         </div>
-                    )}
+                    </div>
+                )}
                     {showBuyHouseDialog && (
                         <div className={styles.overlay}>
                             <div className={styles.modal}>

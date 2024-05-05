@@ -67,8 +67,7 @@ type Action =
 const initialState: GameState = {
   players: [
     { id: 1, money: 2000, role: Role.MONOPOLIST, position: 1, isBankrupt: false, isJailed: false, color: "red", isJailedNumberOfAttempts: 0},
-    { id: 2, money: 2000, role: Role.CONCURENT, position: 1, isBankrupt: false, isJailed: false, color: "blue", isJailedNumberOfAttempts: 0},
-  ],
+    { id: 2, money: 0, role: Role.CONCURENT, position: 1, isBankrupt: false, isJailed: false, color: "blue", isJailedNumberOfAttempts: 0},  ],
   isPlayingPlayerid: 1,
   fields: initialFields,
   ownership: {},
@@ -477,20 +476,7 @@ const playingReducer = (state: GameState, action: Action): GameState => {
         };
       }
       return state;
-    case 'DECLARE_BANKRUPTCY':
-      const updatedOwnership = { ...state.ownership };
-      Object.keys(updatedOwnership).forEach(y => {
-        const keyAsNumber = Number(y);
-        if (updatedOwnership[keyAsNumber] === action.playerId) {
-          delete updatedOwnership[keyAsNumber];
-        }
-      });
-
-      return {
-        ...state,
-        ownership: updatedOwnership,
-        players: state.players.map(p => p.id === action.playerId ? { ...p, isBankrupt: true } : p),
-      };
+      
     default:
       return state;
   }

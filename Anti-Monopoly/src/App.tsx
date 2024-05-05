@@ -13,6 +13,7 @@ import Rules from './components/Rules/Rules.tsx';
 import ErrorPage from './error-page.tsx';
 import Playing from './components/Playing/Playing.tsx';
 import { PlayingProvider } from './providers/PlayingProvider.tsx';
+import Winning from './components/Winning/Winning.tsx';
 
 // Vytvoření routeru s nevnořenými cestami
 const router = createBrowserRouter(
@@ -21,7 +22,8 @@ const router = createBrowserRouter(
     <Route path="choicemenu" element={<PlayingProvider><ChoiceMenu /></PlayingProvider>} />,
     <Route path="rules" element={<Rules />} />,
     <Route path="*" element={<ErrorPage />} />,
-    <Route path="playing" element={<PlayingProvider><Playing /></PlayingProvider>}/>
+    <><Route path="playing" element={<PlayingProvider><Playing /></PlayingProvider>} />
+    <Route path="winning" element={<PlayingProvider><Winning /></PlayingProvider>} /></>
   ])
 );
 
