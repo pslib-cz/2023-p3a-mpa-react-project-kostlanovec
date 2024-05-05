@@ -131,6 +131,10 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
                 playingDispatch({ type: 'LEAVE_JAIL', playerId: currentPlayerId });
                 movePlayer(currentPlayerId, value);
             }
+            else{
+                moveNextNonBankruptPlayer(currentPlayerId);
+            
+            }
             setShowJailDialog(false);
         } else {
             movePlayer(currentPlayerId, value);
@@ -146,6 +150,7 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
             if (rollValue === 6) {
                 playingDispatch({ type: 'LEAVE_JAIL', playerId });
             } else {
+                playingDispatch({ type: 'INCREASE_JAIL_ATTEMPTS', playerId });
                 setShowJailDialog(true);
                 return;
             }
@@ -213,31 +218,35 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
     };
 
     const handleSellProperty = (playerId: number, fieldId: number, price: number) => {
-        playingDispatch({ type: 'SELL_PROPERTY', playerId, fieldId, price });
-        setShowSellPropertyDialog(false);
+        const currentPlayer = playingState.players.find(player => player.id === playerId);
+        if (!currentPlayer) return;
+    
+        playingDispatch({
+            type: 'SELL_PROPERTY',
+            playerId: playerId,
+            fieldId: fieldId,
+            price: price / 2
+        });
+    
+        checkFinancialStatus(currentPlayer);
     };
 
     const checkFinancialStatus = (currentPlayer: PlayingPlayer) => {
         if (currentPlayer && currentPlayer.money < 0) {
             const propertiesOwned = findPropertiesOwnedByPlayer(currentPlayer.id);
-            if (propertiesOwned.length > 0) {
-                const totalValueOfProperties = propertiesOwned.reduce((acc, property) => {
-                    if (property.type === "PROPERTY" || property.type === "TRANSPORT" || property.type === "ENERGY") {
-                        const propertyPrice = (property as Property).price;
-                        return acc + propertyPrice;
-                    }
-                    return acc;
-                }, 0);
-                if (totalValueOfProperties + currentPlayer.money >= 0) {
-                    setShowSellPropertyDialog(true);
-                } else {
-                    handleBankruptcy(currentPlayer.id);
-                }
+            const totalValueOfProperties = propertiesOwned.reduce((acc, property) => {
+                const propertyPrice = (property as Property).price / 2;
+                return acc + propertyPrice;
+            }, 0);
+    
+            if (totalValueOfProperties + currentPlayer.money >= 0) {
+                setShowSellPropertyDialog(false);
+                moveNextNonBankruptPlayer(currentPlayer.id);
             } else {
-                handleBankruptcy(currentPlayer.id);
+                setShowSellPropertyDialog(true);
             }
-        }
-        else{
+        } else {
+            setShowSellPropertyDialog(false); 
             moveNextNonBankruptPlayer(currentPlayer.id);
         }
     };
@@ -258,7 +267,7 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
                     type: "BUY_HOUSE",
                     playerId: currentPlayerId,
                     fieldId: fieldId,
-                    houseCount: 1,
+                    houseCount: (field as Property).houses + 1,
                 });
             }
         }
@@ -294,6 +303,11 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
                 {field.name}
             </p>
             <p>{field.price}</p>
+            {field.houses > 0 && (
+                <div className={styles["house--number"]}>
+                    Počet domů: {field.houses}
+                </div>
+            )}
             </>
         );
     };
@@ -433,13 +447,13 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
                                 <div key={index}>
                                     {property.type === "PROPERTY" && (
                                         <>
-                                            <p>{(property as Property).name} - Sell for {(property as Property).price}</p>
+                                            <p>{(property as Property).name} - Sell for {Math.floor((property as Property).price / 2)}</p>
                                             <button onClick={() => handleSellProperty(currentPlayerId, property.id, (property as Property).price)}>Sell</button>
                                         </>
                                     )}
                                 </div>
-                            ))}
-                                <button onClick={() => setShowSellPropertyDialog(false)}>Cancel</button>
+                                ))}
+                                <p>You need to raise: {Math.abs(playingState.players.find(player => player.id === currentPlayerId)?.money ?? 0)} more</p>
                             </div>
                         </div>
                     )}

@@ -61,7 +61,8 @@ type Action =
   | { type: "REMOVE_PLAYER"; payload: number }
   | { type: "TOGGLE_ROLE"; payload: number }
   | { type: "LEAVE_JAIL"; playerId: number }
-  | { type: "PAY_JAIL_FEE"; playerId: number };
+  | { type: "PAY_JAIL_FEE"; playerId: number }
+  | { type: "INCREASE_JAIL_ATTEMPTS"; playerId: number };
 
 const initialState: GameState = {
   players: [
@@ -462,6 +463,20 @@ const playingReducer = (state: GameState, action: Action): GameState => {
       return state;
 
 
+    case "INCREASE_JAIL_ATTEMPTS":
+      const playerJailed = state.players.find(p => p.id === action.playerId);
+      if (playerJailed) {
+        playerJailed.isJailedNumberOfAttempts += 1;
+        return {
+          ...state,
+          players: state.players.map(p =>
+            p.id === action.playerId
+              ? { ...p, isJailedNumberOfAttempts: playerJailed.isJailedNumberOfAttempts }
+              : p
+          ),
+        };
+      }
+      return state;
     case 'DECLARE_BANKRUPTCY':
       const updatedOwnership = { ...state.ownership };
       Object.keys(updatedOwnership).forEach(y => {
