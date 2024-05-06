@@ -25,6 +25,17 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
             [fieldId]: !prev[fieldId]
         }));
     };
+
+    useEffect(() => {
+        const audio = new Audio("mainmusic.mp3");
+        audio.loop = true;
+        audio.play();
+    
+        return () => {
+          audio.pause();
+          audio.currentTime = 0;
+        };
+      }, []);
     
     const handleSellSelectedProperties = () => {
         const currentPlayer = playingState.players.find(player => player.id === currentPlayerId);
@@ -147,12 +158,7 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
 
     const { fields } = playingState;
 
-    useEffect(() => {
-        if (playingState.chanceCardMessage) {
-            alert(playingState.chanceCardMessage);
-            setChanceCardMessage('');
-        }
-    }, [playingState.chanceCardMessage]);
+
 
     const handleDiceRoll = (value: number) => {
         if (showJailDialog) {
@@ -202,6 +208,11 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
             } else {
                 checkFinancialStatus(currentPlayer);
             }
+        }
+        if (playingState.chanceCardMessage) {
+            alert(playingState.chanceCardMessage);
+            moveNextNonBankruptPlayer(currentPlayerId);
+            setChanceCardMessage(''); 
         }
     };
     
@@ -270,6 +281,9 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
                     const nonBankruptPlayers = playingState.players.filter(player => !player.isBankrupt);
                     if (nonBankruptPlayers.length === 1) {
                         navigate('/winning', { state: { PlayingPlayer: nonBankruptPlayers[0] } });
+                    }
+                    else{
+                        moveNextNonBankruptPlayer(currentPlayer.id);
                     }
             }
         } else {

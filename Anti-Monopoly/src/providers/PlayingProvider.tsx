@@ -314,22 +314,31 @@ const playingReducer = (state: GameState, action: Action): GameState => {
       case "CHANCE_CARD": {
         const playerIndex = state.players.findIndex(p => p.id === action.playerId);
         if (playerIndex !== -1) {
-            const effect = Math.floor(Math.random() * 2);
-            let message = '';
-            switch (effect) {
-                case 0:
-                    state.players[playerIndex].money += 50;
-                    message = "Získal jsi $50";
-                    break;
-                case 1:
-                    state.players[playerIndex].money -= 50;
-                    message = "Ztratil jsi $50!";
-                    break;
-            }
-            return { ...state, chanceCardMessage: message };
+        const effect = Math.floor(Math.random() * 3);
+        let message = '';
+        switch (effect) {
+            case 0:
+            state.players[playerIndex].money += 50;
+            message = "Získal jsi $50";
+            break;
+            case 1:
+            state.players[playerIndex].money -= 50;
+            message = "Ztratil jsi $50!";
+            break;
+            case 2:
+          state.players[playerIndex].position = 1;
+          message = "Jdeš na start!";
+          break;
+            case 3:
+          state.players[playerIndex].position = 11;
+          state.players[playerIndex].isJailed = true;
+          message = "Jdeš do vězení!";
+          break;
+        }
+        return { ...state, chanceCardMessage: message };
         }
         return { ...state };
-    }
+        }
 
     case 'BUY_HOUSE': {
       const fieldIndex = state.fields.findIndex(field => field.id === action.fieldId);
