@@ -1,6 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
-import { PlayingPlayer } from "../../types/type";
+import { PlayingPlayer, Role } from "../../types/type";
 import { useEffect } from "react";
+import styles from './Winning.module.css';
 
 const Winning = () => {
   const location = useLocation();
@@ -17,10 +18,23 @@ const Winning = () => {
     };
   }, []);
 
+  const getImageForRole = (role: Role) => {
+    console.log(role)
+    switch(role) {
+        case Role.MONOPOLIST:
+            return "img/monopolista.jpg";
+        default:
+            return "img/konkurent.jpg";
+    }
+};
+
+const imageSrc = getImageForRole(winner.role);
+
   return (
     <div style={{ textAlign: 'center' }}>
-      <h1>Gratuluji, hráči {winner.id}!</h1>
-      <p>Jsi vítězem!</p>
+      <img  className={styles["winner"]} src={imageSrc} alt={`Hráč ${winner.id}`} />
+      <h1 style={{color: "white"}}>Gratuluji, hráči {winner.id}!</h1>
+      <p style={{color: "white"}}>Jsi vítězem!</p>
       <Link to="/">MainMenu</Link>
     </div>
   );

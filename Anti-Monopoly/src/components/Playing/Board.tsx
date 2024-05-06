@@ -27,6 +27,14 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
     };
 
     useEffect(() => {
+        if (playingState.chanceCardMessage) {
+            alert(playingState.chanceCardMessage);
+            setChanceCardMessage('');
+            moveNextNonBankruptPlayer(currentPlayerId);
+        }
+    }, [playingState.chanceCardMessage]);
+
+    useEffect(() => {
         const audio = new Audio("mainmusic.mp3");
         audio.loop = true;
         audio.play();
@@ -209,10 +217,11 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
                 checkFinancialStatus(currentPlayer);
             }
         }
-        if (playingState.chanceCardMessage) {
-            alert(playingState.chanceCardMessage);
-            moveNextNonBankruptPlayer(currentPlayerId);
-            setChanceCardMessage(''); 
+        else if (landedField && landedField.type === "CHANCE_CARD") {
+            playingDispatch({ type: "CHANCE_CARD", playerId });
+        }
+        else{
+            checkFinancialStatus(currentPlayer);
         }
     };
     
