@@ -67,7 +67,7 @@ type Action =
 const initialState: GameState = {
   players: [
     { id: 1, money: 2000, role: Role.MONOPOLIST, position: 1, isBankrupt: false, isJailed: false, color: "red", isJailedNumberOfAttempts: 0},
-    { id: 2, money: 0, role: Role.CONCURENT, position: 1, isBankrupt: false, isJailed: false, color: "blue", isJailedNumberOfAttempts: 0},  ],
+    { id: 2, money: 2000, role: Role.CONCURENT, position: 1, isBankrupt: false, isJailed: false, color: "blue", isJailedNumberOfAttempts: 0},  ],
   isPlayingPlayerid: 1,
   fields: initialFields,
   ownership: {},

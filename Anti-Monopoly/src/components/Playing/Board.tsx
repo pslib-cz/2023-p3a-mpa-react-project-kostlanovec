@@ -13,7 +13,7 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
     const [hoveredFieldId, setHoveredFieldId] = useState<number | null>(null);
     const [showBuyHouseDialog, setShowBuyHouseDialog] = useState<boolean>(false);
     const [selectedPropertyForHouse] = useState<number>(0);
-    const [, setChanceCardMessage] = useState<string>('');
+    const [changecard, setChanceCardMessage] = useState<string>('');
     const [showJailDialog, setShowJailDialog] = useState<boolean>(false);
     const [selectedPropertiesForSale, setSelectedPropertiesForSale] = useState<{ [key: number]: boolean }>({});
     const [totalNeeded, setTotalNeeded] = useState<number>(0);
@@ -27,14 +27,6 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
     };
 
     useEffect(() => {
-        if (playingState.chanceCardMessage) {
-            alert(playingState.chanceCardMessage);
-            setChanceCardMessage('');
-            moveNextNonBankruptPlayer(currentPlayerId);
-        }
-    }, [playingState.chanceCardMessage]);
-
-    useEffect(() => {
         const audio = new Audio("mainmusic.mp3");
         audio.loop = true;
         audio.play();
@@ -44,6 +36,16 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
           audio.currentTime = 0;
         };
       }, []);
+
+      useEffect(() => {
+        if (playingState.chanceCardMessage) {
+            alert(playingState.chanceCardMessage);
+            setChanceCardMessage('');
+            moveNextNonBankruptPlayer(currentPlayerId);
+        }
+    }, [playingState.chanceCardMessage]);
+
+
     
     const handleSellSelectedProperties = () => {
         const currentPlayer = playingState.players.find(player => player.id === currentPlayerId);
@@ -216,9 +218,6 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
             } else {
                 checkFinancialStatus(currentPlayer);
             }
-        }
-        else if (landedField && landedField.type === "CHANCE_CARD") {
-            playingDispatch({ type: "CHANCE_CARD", playerId });
         }
         else{
             checkFinancialStatus(currentPlayer);
