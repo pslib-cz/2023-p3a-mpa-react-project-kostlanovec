@@ -13,7 +13,7 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
     const [hoveredFieldId, setHoveredFieldId] = useState<number | null>(null);
     const [showBuyHouseDialog, setShowBuyHouseDialog] = useState<boolean>(false);
     const [selectedPropertyForHouse] = useState<number>(0);
-    const [changecard, setChanceCardMessage] = useState<string>('');
+    const [,setChanceCardMessage] = useState<string>('');
     const [showJailDialog, setShowJailDialog] = useState<boolean>(false);
     const [selectedPropertiesForSale, setSelectedPropertiesForSale] = useState<{ [key: number]: boolean }>({});
     const [totalNeeded, setTotalNeeded] = useState<number>(0);
@@ -26,6 +26,35 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
         }));
     };
 
+    const handleJailDialog = () => {
+        const currentPlayer = playingState.players.find(player => player.id === currentPlayerId);
+        if (currentPlayer && currentPlayer.isJailed && currentPlayer.isJailedNumberOfAttempts < 3) {
+            return (
+                <div className={styles.overlay}>
+                    <div className={styles.modal}>
+                        <h2>Jsi ve vězení</h2>
+                        <p>Možnosti:</p>
+                        <p>Zaplatit 100 a okamžitě odejít, nebo pokusit se hodit 6 a zůstat bez platby. Máš {3 - currentPlayer.isJailedNumberOfAttempts} pokusy.</p>
+                        <button onClick={() => handleJailDecision(true)}>Zaplatit 100</button>
+                        <button onClick={() => handleJailDecision(false)}>Hodit kostkou</button>
+                    </div>
+                </div>
+            );
+        } else if (currentPlayer && currentPlayer.isJailedNumberOfAttempts >= 3) {
+            return (
+                <div className={styles.overlay}>
+                    <div className={styles.modal}>
+                        <h2>Konec pokusů</h2>
+                        <p>Odseděl sis své a zaplatíš 100.</p>
+                        <button onClick={() => handleJailDecision(true)}>Pokračovat ve hře</button>
+                    </div>
+                </div>
+            );
+        } else {
+            return null;
+        }
+    };
+    
     useEffect(() => {
         const audio = new Audio("mainmusic.mp3");
         audio.loop = true;
@@ -50,7 +79,7 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
     const handleSellSelectedProperties = () => {
         const currentPlayer = playingState.players.find(player => player.id === currentPlayerId);
         if (!currentPlayer) return;
-
+    
         let accumulated = 0;
         findPropertiesOwnedByPlayer(currentPlayerId).forEach((property) => {
             if (selectedPropertiesForSale[property.id]) {
@@ -58,13 +87,17 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
                 handleSellProperty(currentPlayerId, property.id, (property as Property).price);
             }
         });
-
+    
         const newTotalNeeded = totalNeeded - accumulated;
         setTotalNeeded(newTotalNeeded);
         if (newTotalNeeded <= 0) {
             setShowSellPropertyDialog(false);
+            if (newTotalNeeded <= 0) {
+                moveNextNonBankruptPlayer(currentPlayerId);
+            }
         }
     };
+    
 
     const handleMouseEnter = (fieldId: number) => {
         setHoveredFieldId(fieldId);
@@ -168,20 +201,19 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
 
     const { fields } = playingState;
 
-
-
     const handleDiceRoll = (value: number) => {
-        if (showJailDialog) {
+        const currentPlayer = playingState.players.find(player => player.id === currentPlayerId);
+        if (currentPlayer && (currentPlayer.isJailed === true || currentPlayer.isJailedNumberOfAttempts >= 3)) {
             if (value === 6) {
                 playingDispatch({ type: 'LEAVE_JAIL', playerId: currentPlayerId });
-                movePlayer(currentPlayerId, value);
             }
             else{
+                playingDispatch({ type: 'INCREASE_JAIL_ATTEMPTS', playerId: currentPlayerId });
                 moveNextNonBankruptPlayer(currentPlayerId);
+                setShowJailDialog(true);
             
             }
-            setShowJailDialog(false);
-        } else {
+        } else {;
             movePlayer(currentPlayerId, value);
         }
     };
@@ -219,6 +251,11 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
                 checkFinancialStatus(currentPlayer);
             }
         }
+        else if (landedField && landedField.type === "CHANCE_CARD") {
+            playingDispatch({ type: 'CHANCE_CARD', playerId });
+            checkFinancialStatus(currentPlayer);
+            moveNextNonBankruptPlayer(currentPlayer.id);
+        }
         else{
             checkFinancialStatus(currentPlayer);
         }
@@ -226,12 +263,27 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
     
     
     const moveNextNonBankruptPlayer = (currentPlayerId: number) => {
-        let nextPlayerId = (currentPlayerId % playingState.players.length) + 1;
-        while (playingState.players.find(player => player.id === nextPlayerId)?.isBankrupt) {
-            nextPlayerId = (nextPlayerId % playingState.players.length) + 1;
+        let nextPlayerIndex = (currentPlayerId % playingState.players.length) + 1;
+        let nextPlayer = null;
+        
+        while (!nextPlayer) {
+            const candidatePlayer = playingState.players[nextPlayerIndex - 1];
+            if (!candidatePlayer.isBankrupt) {
+                nextPlayer = candidatePlayer;
+                setCurrentPlayerId(nextPlayer.id);
+                if (nextPlayer.isJailed) {
+                    if (nextPlayer.isJailedNumberOfAttempts < 3) {
+                        setShowJailDialog(true);
+                    } else {
+                        playingDispatch({ type: 'LEAVE_JAIL', playerId: nextPlayer.id });
+                    }
+                }
+            } else {
+                nextPlayerIndex = (nextPlayerIndex % playingState.players.length) + 1;
+            }
         }
-        setCurrentPlayerId(nextPlayerId);
     };
+    
     
     const handleDialogResponse = (response: boolean) => {
         if (response) {
@@ -325,10 +377,11 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
                 playerId: currentPlayerId
             });
             playingDispatch({ type: 'LEAVE_JAIL', playerId: currentPlayerId });
+            setShowJailDialog(false);
+
         } else {
             setShowJailDialog(false);
         }
-        setShowJailDialog(false);
     };
     
     const PropertyComponent = ({ field }: { field: Property }) => {
@@ -496,12 +549,12 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
                                     <p>{(field as Property).name} - Sell for {Math.floor((field as Property).price / 2)}</p>
                                 </div>
                             ))}
-                            <p>You need to raise: {Math.abs(playingState.players.find(player => player.id === currentPlayerId)?.money ?? 0)} more</p>
+                            <p>Potřebuješ prodat v hodnotě: {Math.abs(playingState.players.find(player => player.id === currentPlayerId)?.money ?? 0)}</p>
                             <button 
                                 onClick={handleSellSelectedProperties}
                                 disabled={!Object.keys(selectedPropertiesForSale).some(id => selectedPropertiesForSale[Number(id)])}
                             >
-                                Sell Selected Properties
+                                Prodat vybrané nemovitosti
                             </button>
                         </div>
                     </div>
@@ -515,18 +568,7 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
                             </div>
                         </div>
                     )}
-                    {showJailDialog && (
-                        <div className={styles.overlay}>
-                            <div className={styles.modal}>
-                                <h2>Opustit vězení</h2>
-                                <p>Máte možnosti:</p>
-                                <p>Zaplatit 100 a okamžitě odejít, nebo pokusit se hodit 6 a zůstat bez platby. Pokud hodíte 6, můžete znovu hodit kostkou.</p>
-                                <button onClick={() => handleJailDecision(true)}>Zaplatit 100</button>
-                                <button onClick={() => handleJailDecision(false)}>Hodit kostkou</button>
-                            </div>
-                        </div>
-                    )}
-
+                    {showJailDialog && handleJailDialog()}
                 </div>
                 <div className={styles["dices"]}>
                     <Dice size={100} onRoll={handleDiceRoll} />
