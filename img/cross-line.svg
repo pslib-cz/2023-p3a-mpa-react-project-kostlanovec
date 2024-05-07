@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="32"
+   height="32"
+   viewBox="0 0 32 32"
+   version="1.1"
+   id="svg1"
+   sodipodi:docname="cross-line.svg"
+   inkscape:version="1.3 (0e150ed6c4, 2023-07-21)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs1" />
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="24.28125"
+     inkscape:cx="16"
+     inkscape:cy="16"
+     inkscape:window-width="1920"
+     inkscape:window-height="991"
+     inkscape:window-x="2391"
+     inkscape:window-y="-9"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg1" />
+  <title
+     id="title1">bas169 - Regular</title>
+  <g
+     id="bas169">
+    <g
+       id="Regular-2"
+       data-name="Regular">
+      <path
+         d="M17.621,15.5,28.061,5.062A1.5,1.5,0,0,0,25.939,2.94L15.5,13.379,5.061,2.94A1.5,1.5,0,0,0,2.939,5.062L13.379,15.5,2.939,25.939a1.5,1.5,0,0,0,2.122,2.122L15.5,17.622,25.939,28.061a1.5,1.5,0,0,0,2.122-2.122Z"
+         id="path1"
+         style="fill:#ffffff;fill-opacity:1" />
+    </g>
+  </g>
+</svg>
