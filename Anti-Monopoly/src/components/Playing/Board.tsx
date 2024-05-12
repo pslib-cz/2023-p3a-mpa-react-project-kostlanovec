@@ -70,7 +70,6 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
         if (playingState.chanceCardMessage) {
             alert(playingState.chanceCardMessage);
             setChanceCardMessage('');
-            moveNextNonBankruptPlayer(currentPlayerId);
         }
     }, [playingState.chanceCardMessage]);
 
@@ -237,11 +236,16 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
                     checkFinancialStatus(currentPlayer);
                 }
             } else if (playingState.ownership[landedField.id] === playerId) {
-                const propertyCity = cities.find(c => c.id === (landedField as Property).cityid);
-                const propertiesInCity = fields.filter(f => f.type === "PROPERTY" && (f as Property).cityid === propertyCity?.id);
-                const ownedPropertiesInCity = propertiesInCity.filter(p => playingState.ownership[p.id] === playerId);
-                if (ownedPropertiesInCity.length === propertiesInCity.length) {
-                    if ((landedField as Property).houses < 6) {
+                const property = landedField as Property;
+                if (currentPlayer.role === "CONCURENT") {
+                    if (property.houses < 6) {
+                        setShowBuyHouseDialog(true);
+                    }
+                } else if (currentPlayer.role === "MONOPOLIST") {
+                    const propertyCity = cities.find(c => c.id === property.cityid);
+                    const propertiesInCity = fields.filter(f => f.type === "PROPERTY" && (f as Property).cityid === propertyCity?.id);
+                    const ownedPropertiesInCity = propertiesInCity.filter(p => playingState.ownership[p.id] === playerId);
+                    if (ownedPropertiesInCity.length === propertiesInCity.length && property.houses < 6) {
                         setShowBuyHouseDialog(true);
                     }
                 } else {
@@ -250,16 +254,15 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
             } else {
                 checkFinancialStatus(currentPlayer);
             }
-        }
-        else if (landedField && landedField.type === "CHANCE_CARD") {
+        } else if (landedField && landedField.type === "CHANCE_CARD") {
             playingDispatch({ type: 'CHANCE_CARD', playerId });
             checkFinancialStatus(currentPlayer);
             moveNextNonBankruptPlayer(currentPlayer.id);
-        }
-        else{
+        } else {
             checkFinancialStatus(currentPlayer);
         }
     };
+    
     
     
     const moveNextNonBankruptPlayer = (currentPlayerId: number) => {
@@ -284,7 +287,7 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
         }
     };
     
-    
+
     const handleDialogResponse = (response: boolean) => {
         if (response) {
             const newPositionId = playingState.players.find(player => player.id === currentPlayerId)?.position || 0;
