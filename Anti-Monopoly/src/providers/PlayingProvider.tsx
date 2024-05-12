@@ -328,6 +328,7 @@ const playingReducer = (state: GameState, action: Action): GameState => {
             case 2:
           state.players[playerIndex].position = 1;
           message = "Jdeš na start!";
+          state.players[playerIndex].money += 200;
           break;
             case 3:
           state.players[playerIndex].position = 11;
@@ -340,34 +341,43 @@ const playingReducer = (state: GameState, action: Action): GameState => {
         return { ...state };
         }
 
-    case 'BUY_HOUSE': {
-      const fieldIndex = state.fields.findIndex(field => field.id === action.fieldId);
-      const playerIndex = state.players.findIndex(player => player.id === action.playerId);
-      if (fieldIndex !== -1 && playerIndex !== -1) {
-        const field = state.fields[fieldIndex] as Property;
-        const player = state.players[playerIndex];
-        const housePrice = (field as Property).type === "PROPERTY" ? cities.find(city => city.id === (field as Property).cityid)?.pricehouse : undefined;
+        case 'BUY_HOUSE': {
+          console.log("nakupování domů")
+          const field = state.fields.find(field => field.id === action.fieldId);
+          const payPlayer = state.players.find(player => player.id === action.playerId);
+          if (field && payPlayer) {
+            console.log("jsem se dostal do ifu")
+            const propertyField = field as Property;
+            const housePrice = cities.find(city => city.id === propertyField.cityid)?.pricehouse;
 
-        const ownsOtherPropertiesInCity = state.fields.filter(f =>
-          f.type === "PROPERTY" && (f as Property).cityid === (field as Property).cityid && state.ownership[f.id] === action.playerId
-        ).length > 1;
+            const ownsOtherPropertiesInCity = state.fields.filter(f =>
+              f.type === "PROPERTY" && (f as Property).cityid === propertyField.cityid && state.ownership[f.id] === action.playerId
+            ).length > 1;
 
+            const totalCost = (housePrice || 0) * action.houseCount;
 
-        const totalCost = (housePrice || 0) * action.houseCount;
-    
-        if (field.type === "PROPERTY" && player.money >= totalCost && ownsOtherPropertiesInCity) {
-          field.houses += action.houseCount;
-          player.money -= totalCost;
-    
-          return {
-            ...state,
-            fields: [...state.fields.slice(0, fieldIndex), field, ...state.fields.slice(fieldIndex + 1)],
-            players: [...state.players.slice(0, playerIndex), player, ...state.players.slice(playerIndex + 1)],
-          };
+            const maxHouses = payPlayer.role === "CONCURENT" ? 5 : payPlayer.role === "MONOPOLIST" ? 4 : 0;
+
+            if (propertyField.type === "PROPERTY" && payPlayer.money >= totalCost && ((propertyField.houses + action.houseCount) <= maxHouses) && (payPlayer.role === "CONCURENT" || ownsOtherPropertiesInCity)) {
+              propertyField.houses += action.houseCount;
+              payPlayer.money -= totalCost;
+              console.log("koupil jsem dům")
+
+              return {
+                ...state,
+                fields: [
+                  ...state.fields.slice(0, state.fields.findIndex(f => f.id === action.fieldId)),
+                  propertyField,
+                  ...state.fields.slice(state.fields.findIndex(f => f.id === action.fieldId) + 1)
+                ],
+                players: state.players
+                  .filter(p => p !== undefined)
+                  .map(p => p as PlayingPlayer), 
+              };
+            }
+          }
+          return state;
         }
-      }
-      return state;
-    }
 
     case 'SELL_PROPERTY': {
       const updatedOwnership = { ...state.ownership };

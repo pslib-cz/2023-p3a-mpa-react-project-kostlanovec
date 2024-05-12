@@ -12,7 +12,6 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
     const [showSellPropertyDialog, setShowSellPropertyDialog] = useState<boolean>(false);
     const [hoveredFieldId, setHoveredFieldId] = useState<number | null>(null);
     const [showBuyHouseDialog, setShowBuyHouseDialog] = useState<boolean>(false);
-    const [selectedPropertyForHouse] = useState<number>(0);
     const [,setChanceCardMessage] = useState<string>('');
     const [showJailDialog, setShowJailDialog] = useState<boolean>(false);
     const [selectedPropertiesForSale, setSelectedPropertiesForSale] = useState<{ [key: number]: boolean }>({});
@@ -72,8 +71,6 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
             setChanceCardMessage('');
         }
     }, [playingState.chanceCardMessage]);
-
-
     
     const handleSellSelectedProperties = () => {
         const currentPlayer = playingState.players.find(player => player.id === currentPlayerId);
@@ -96,7 +93,6 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
             }
         }
     };
-    
 
     const handleMouseEnter = (fieldId: number) => {
         setHoveredFieldId(fieldId);
@@ -236,19 +232,29 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
                     checkFinancialStatus(currentPlayer);
                 }
             } else if (playingState.ownership[landedField.id] === playerId) {
-                const property = landedField as Property;
-                if (currentPlayer.role === "CONCURENT") {
-                    if (property.houses < 6) {
-                        setShowBuyHouseDialog(true);
+                if (landedField.type === "PROPERTY"){
+                    const property = landedField as Property;
+                    if (currentPlayer.role === "CONCURENT") {
+                        if (property.houses < 5) {
+                            setShowBuyHouseDialog(true);
+                        }
+                    } else if (currentPlayer.role === "MONOPOLIST") {
+                        const propertyCity = cities.find(c => c.id === property.cityid);
+                        const propertiesInCity = fields.filter(f => f.type === "PROPERTY" && (f as Property).cityid === propertyCity?.id);
+                        const ownedPropertiesInCity = propertiesInCity.filter(p => playingState.ownership[p.id] === playerId);
+                        if (ownedPropertiesInCity.length === propertiesInCity.length && property.houses < 4) {  // Set max houses to 4 for "MONOPOLIST"
+                            setShowBuyHouseDialog(true);
+                        }
+                        else{
+                            moveNextNonBankruptPlayer(currentPlayerId);
+                        }
                     }
-                } else if (currentPlayer.role === "MONOPOLIST") {
-                    const propertyCity = cities.find(c => c.id === property.cityid);
-                    const propertiesInCity = fields.filter(f => f.type === "PROPERTY" && (f as Property).cityid === propertyCity?.id);
-                    const ownedPropertiesInCity = propertiesInCity.filter(p => playingState.ownership[p.id] === playerId);
-                    if (ownedPropertiesInCity.length === propertiesInCity.length && property.houses < 6) {
-                        setShowBuyHouseDialog(true);
+                    else {
+                        checkFinancialStatus(currentPlayer);
                     }
-                } else {
+                }
+               
+                 else {
                     checkFinancialStatus(currentPlayer);
                 }
             } else {
@@ -262,7 +268,6 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
             checkFinancialStatus(currentPlayer);
         }
     };
-    
     
     
     const moveNextNonBankruptPlayer = (currentPlayerId: number) => {
@@ -418,7 +423,7 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
                     {fields.map((field) => (
                         <div
                             className={`${styles["field"]}`}
-                            key={field.id}
+                            key={`${field.id}-${(field as Property).houses}`}
                             id={String(field.id)}
                             onMouseEnter={() => (field.type === "PROPERTY" || field.type === "TRANSPORT") && handleMouseEnter(field.id)}
                             onMouseLeave={handleMouseLeave}
@@ -436,6 +441,7 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
                                             <p>{`HRÁČ ${playingState.players.find(player => player.id === playingState.ownership[field.id])?.id}`}</p>
                                         </div>
                                     )}
+                                
                                 </div>
                             )}
 
@@ -565,8 +571,8 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
                     {showBuyHouseDialog && (
                         <div className={styles.overlay}>
                             <div className={styles.modal}>
-                                <p>Koupit dům za {cities.find(c => c.id === fields[selectedPropertyForHouse as number - 1]?.id)?.pricehouse}?</p>
-                                <button onClick={() => handleBuyHouse(selectedPropertyForHouse as number)}>Koupit</button>
+                                <p>Koupit dům za {cities.find(c => c.id === fields[currentPlayerId as number].id)?.pricehouse}?</p>
+                                <button onClick={() => handleBuyHouse(currentPlayerId as number)}>Koupit</button>
                                 <button onClick={() => setShowBuyHouseDialog(false)}>Zrušit</button>
                             </div>
                         </div>
