@@ -342,11 +342,10 @@ const playingReducer = (state: GameState, action: Action): GameState => {
         }
 
         case 'BUY_HOUSE': {
-          console.log("nakupování domů")
           const field = state.fields.find(field => field.id === action.fieldId);
           const payPlayer = state.players.find(player => player.id === action.playerId);
           if (field && payPlayer) {
-            console.log("jsem se dostal do ifu")
+  
             const propertyField = field as Property;
             const housePrice = cities.find(city => city.id === propertyField.cityid)?.pricehouse;
 
@@ -361,7 +360,6 @@ const playingReducer = (state: GameState, action: Action): GameState => {
             if (propertyField.type === "PROPERTY" && payPlayer.money >= totalCost && ((propertyField.houses + action.houseCount) <= maxHouses) && (payPlayer.role === "CONCURENT" || ownsOtherPropertiesInCity)) {
               propertyField.houses += action.houseCount;
               payPlayer.money -= totalCost;
-              console.log("koupil jsem dům")
 
               return {
                 ...state,

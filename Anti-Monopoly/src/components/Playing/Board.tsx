@@ -360,23 +360,31 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
         }
     };
 
-    const handleBuyHouse = (fieldId: number) => {
-        const field = fields[fieldId - 1];
-        if (field.type === "PROPERTY") {
-            const propertyField = field as Property;
+    const handleBuyHouse = () => {
+        const currentPlayer = playingState.players.find(player => player.id === currentPlayerId);
+        if (!currentPlayer) return;
+    
+        const currentPosition = currentPlayer.position;
+        const propertyField = fields.find(field => field.id === currentPosition) as Property;
+    
+        if (propertyField && propertyField.type === "PROPERTY") {
             const housePrice = cities.find(c => c.id === propertyField.cityid)?.pricehouse;
-            if (housePrice) {
+    
+            if (housePrice && currentPlayer.money >= housePrice) {
                 playingDispatch({
                     type: "BUY_HOUSE",
                     playerId: currentPlayerId,
-                    fieldId: fieldId,
-                    houseCount: (field as Property).houses + 1,
+                    fieldId: currentPosition,
+                    houseCount: propertyField.houses + 1,
                 });
+            } else {
+                alert("Nemáte dostatek peněz na koupi domu.");
             }
         }
         setShowBuyHouseDialog(false);
         setCurrentPlayerId((currentPlayerId % playingState.players.length) + 1);
     };
+    
 
     const handleJailDecision = (pay: boolean) => {
         if (pay) {
@@ -408,9 +416,9 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
             </p>
             <p>{field.price}</p>
             {field.houses > 0 && (
-                <div className={styles["house--number"]}>
-                    Počet domů: {field.houses}
-                </div>
+                <p className={styles["house--number"]}>
+                    {field.houses}
+                </p>
             )}
             </>
         );
@@ -441,7 +449,6 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
                                             <p>{`HRÁČ ${playingState.players.find(player => player.id === playingState.ownership[field.id])?.id}`}</p>
                                         </div>
                                     )}
-                                
                                 </div>
                             )}
 
@@ -534,11 +541,12 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
                     <div className={styles["blank_field"]}>
                         <WindowsStats currentPlayerId={currentPlayerId} />
                     </div>
+
+
                     {showBuyPropertyDialog && (
                         <div className={styles.overlay}>
                             <div className={styles.modal}>
                                 <h2>Koupit nemovitost?</h2>
-                                <p>Chcete koupit tuto nemovitost za 100?</p>
                                 <button onClick={() => handleDialogResponse(true)}>Koupit</button>
                                 <button onClick={() => handleDialogResponse(false)}>Zrušit</button>
                             </div>
@@ -571,8 +579,8 @@ const Board = ({ currentPlayerId, setCurrentPlayerId }: { currentPlayerId: numbe
                     {showBuyHouseDialog && (
                         <div className={styles.overlay}>
                             <div className={styles.modal}>
-                                <p>Koupit dům za {cities.find(c => c.id === fields[currentPlayerId as number].id)?.pricehouse}?</p>
-                                <button onClick={() => handleBuyHouse(currentPlayerId as number)}>Koupit</button>
+                                <p>Koupit dům za {cities.find(c => c.id === fields[(playingState.players.find(player => player.position === currentPlayerId) as unknown) as number]?.id)?.pricehouse}?</p>
+                                <button onClick={() => handleBuyHouse()}>Koupit</button>
                                 <button onClick={() => setShowBuyHouseDialog(false)}>Zrušit</button>
                             </div>
                         </div>
