@@ -2,3 +2,22 @@ body{
     user-select: none;
     overflow: hidden;
 }
+
+/* Základní velikost písma pro mobilní zařízení */
+html {
+    font-size: 62.5%; /* Toto nastavuje základní velikost písma na 10px, protože 62.5% z 16px (standardní velikost prohlížeče) je 10px */
+}
+
+/* Media query pro tablety */
+@media (min-width: 768px) {
+    html {
+        font-size: 75%; /* Zvětší základní velikost písma na 12px */
+    }
+}
+
+/* Media query pro počítače */
+@media (min-width: 992px) {
+    html {
+        font-size: 100%;
+    }
+}

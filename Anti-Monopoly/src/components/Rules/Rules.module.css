@@ -23,3 +23,10 @@
 .h1-rules{
     text-align: center;
 }
+.div-rules{
+    margin: 1em;
+}
+
+.red-rules{
+    color: red;
+}
