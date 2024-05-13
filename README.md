@@ -7,8 +7,7 @@ Antimonopoly je společenská hra inspirovaná Monopoly, ale s odlišnými pravi
 
 Zde budou živé linky na:
 - [figma návrh stránek aplikace](https://www.figma.com/file/7aOytndegFgeOyqWfMGZd1/Untitled?type=design&node-id=0%3A1&mode=design&t=Dc2NjVutnCt1RiLT-1)
-- odkaz na gh-pages projektu
-- odkaz do repozitáře projektu, pokud pracuji v teamu a zde vývoj neprobíhá
+- [Githup Pages odkaz](https://pslib-cz.github.io/2023-p3a-mpa-react-project-kostlanovec/)
 
 ### Z čeho čerpat
 
