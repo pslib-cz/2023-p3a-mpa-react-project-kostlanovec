@@ -36,7 +36,7 @@ const ChoiceMenu = () => {
                 {players.length < 6 && (
                     <figure>
                         <div className={styles["add--figure"]} onClick={addPlayer}>
-                            <img src="/img/plus.svg" />
+                            <img src="img/plus.svg" />
                         </div>
                     </figure>
                 )}

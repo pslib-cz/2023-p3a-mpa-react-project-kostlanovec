@@ -19,12 +19,13 @@ import Winning from './components/Winning/Winning.tsx';
 const router = createBrowserRouter(
   createRoutesFromElements([
     <Route path="/" element={<MainMenu />} />,
-    <Route path="choicemenu" element={<PlayingProvider><ChoiceMenu /></PlayingProvider>} />,
-    <Route path="rules" element={<Rules />} />,
+    <Route path="/choicemenu" element={<PlayingProvider><ChoiceMenu /></PlayingProvider>} />,
+    <Route path="/rules" element={<Rules />} />,
     <Route path="*" element={<ErrorPage />} />,
-    <><Route path="playing" element={<PlayingProvider><Playing /></PlayingProvider>} />
-    <Route path="winning" element={<PlayingProvider><Winning /></PlayingProvider>} /></>
-  ])
+    <Route path="/playing" element={<PlayingProvider><Playing /></PlayingProvider>} />,
+    <Route path="winning" element={<PlayingProvider><Winning /></PlayingProvider>} />
+  ]),
+  {basename: '/2023-p3a-mpa-react-project-kostlanovec/'}
 );
 
 function App() {
